@@ -1,4 +1,8 @@
-/.idea
-/data
-/target
-/ResumeEngine.iml
+target/
+node_modules/
+
+### IntelliJ IDEA ###
+.idea
+.iws
+.iml
+.ipr
