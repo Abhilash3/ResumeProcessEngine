@@ -25,13 +25,14 @@ class App extends React.Component {
 class ResumeList extends React.Component{
 	render() {
 		var resumes = this.props.resumes.map(resume =>
-			<Resume key={resume._links.self.href} resume={resume}/>
+			<Resume key={resume._links.self.href} resume={resume.content}/>
 		);
 		return (
 			<table>
 				<tbody>
 					<tr>
-						<th>ID</th>
+						<th>Id</th>
+						<th>Content</th>
 					</tr>
 					{resumes}
 				</tbody>
@@ -44,7 +45,8 @@ class Resume extends React.Component {
 	render() {
 		return (
 			<tr>
-				<td>{this.props.Resume.id}</td>
+				<td>{this.props.resume.id}</td>
+				<td>{this.props.resume.content}</td>
 			</tr>
 		)
 	}
