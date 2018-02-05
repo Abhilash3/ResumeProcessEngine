@@ -1,6 +1,6 @@
-package com.epam.resume_gateway;
+package com.epam.resume;
 
-import com.epam.resume_gateway.dao.Resume;
+import com.epam.resume.gateway.Resume;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -14,8 +14,8 @@ public class ResumeSerializer extends JsonSerializer<Resume> {
     @Override
     public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
+        jsonGenerator.writeStringField("fileName", resume.fileName());
         jsonGenerator.writeStringField("id", resume.id());
-        jsonGenerator.writeStringField("content", resume.content());
         jsonGenerator.writeEndObject();
     }
 }

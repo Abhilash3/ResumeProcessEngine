@@ -1,4 +1,4 @@
-package com.epam.resume_gateway.dao;
+package com.epam.resume.gateway;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
