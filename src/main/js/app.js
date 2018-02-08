@@ -3,6 +3,14 @@ const ReactDOM = require('react-dom');
 const client = require('./client');
 
 class App extends React.Component {
+    render() {
+        return (
+            <ResumeSearch />
+        );
+    }
+}
+
+class ResumeSearch extends React.Component {
 
     constructor(props) {
         super(props);
@@ -17,8 +25,10 @@ class App extends React.Component {
             window.addEventListener('scroll', this.onScroll, false);
         }
 
-        var skills = document.querySelector('#skills').value.split(',').map(a => a.trim());
-        var experience = document.querySelector('#experience').value;
+        var skills = document.querySelector('#skills').value.split(',')
+            .map(a => a.trim()).filter(a => a.length > 0);
+
+        var experience = document.querySelector('#exp').value;
 
         this.retrieveResumes({skills, experience}, 0, []);
     }
@@ -56,10 +66,16 @@ class App extends React.Component {
         return (
             <div>
                 <div className='input-group'>
-                    <input type='text' className='form-control' id='skills'></input>
-                    <input type='number' className='form-control' id='experience'></input>
+                    <div className='input-group-prepend'>
+                        <span className='input-group-text'>Total </span>
+                    </div>
+                    <input type='number' className='form-control' id='exp'></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text' onClick={this.onClick}>Search...</span>
+                        <span className='input-group-text'>years of experience in </span>
+                    </div>
+                    <input type='text' className='form-control' id='skills'></input>
+                    <div className='input-group-append'>
+                        <button className='btn btn-outline-secondary' type='button' onClick={this.onClick}>Search...</button>
                     </div>
                 </div>
                 <ResumeList resumes={this.state.resumes}/>
@@ -74,11 +90,9 @@ class ResumeList extends React.Component {
             <Resume key={resume.fileName} resume={resume}/>
         );
         return (
-            <div className="card">
-                <ul className="list-group list-group-flush">
-                    {resumes}
-                </ul>
-            </div>
+            <table className='table table-hover'>
+                {resumes}
+            </table>
         );
     }
 }
@@ -96,11 +110,14 @@ class Resume extends React.Component {
 
     render() {
         return (
-            <li className="list-group-item list-group-item-action">
-                <a className="card-link" onClick={this.onClick}>
-                    {this.props.resume.fileName}
-                </a>
-            </li>
+            <tr>
+                <td>{this.props.resume.id}</td>
+                <td>
+                    <a href='#' className="card-link" onClick={this.onClick}>{this.props.resume.fileName}</a>
+                </td>
+                <td>{this.props.resume.exp}</td>
+                <td>{this.props.resume.skills.join(', ')}</td>
+            </tr>
         )
     }
 }

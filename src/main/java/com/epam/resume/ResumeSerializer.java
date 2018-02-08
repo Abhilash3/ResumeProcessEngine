@@ -15,6 +15,8 @@ public class ResumeSerializer extends JsonSerializer<Resume> {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("fileName", resume.fileName());
         jsonGenerator.writeStringField("id", resume.id());
+        jsonGenerator.writeNumberField("exp", resume.experience());
+        jsonGenerator.writeObjectField("skills", resume.skills());
         jsonGenerator.writeEndObject();
     }
 }
