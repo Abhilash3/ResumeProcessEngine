@@ -1,67 +1,63 @@
 package com.epam.resume;
 
-import com.epam.resume.gateway.IResumeRepository;
-import com.epam.resume.gateway.Resume;
+import com.epam.file.FileTypes;
+import com.epam.resume.repository.IResumeRepository;
+import com.epam.rule.RuleExecutor;
+import com.epam.rule.LowerCase;
+import com.epam.rule.RemoveExtraSpace;
+import com.epam.rule.KeepOnlyAlphanumeric;
+import com.epam.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.*;
 
 @Component
 public class ResumeLoader implements CommandLineRunner {
-
-    private IResumeRepository repository;
 
     @Value("${application.resume.location}")
     private String resumeLocation;
 
     @Value("${application.resume.level}")
-    private int deep;
+    private int levelInside;
+
+    private final IResumeRepository repository;
+    private final RuleExecutor executor;
 
     @Autowired
-    public ResumeLoader(IResumeRepository repository) {
+    public ResumeLoader(IResumeRepository repository, RuleExecutor executor) {
         this.repository = repository;
+        this.executor = executor
+                .addRule(new KeepOnlyAlphanumeric())
+                .addRule(new RemoveExtraSpace())
+                .addRule(new LowerCase());
     }
 
     @Override
-    public void run(String... strings) throws Exception {
+    public void run(String... strings) {
         if (repository.count() == 0) {
             repository.deleteAll();
-            File resumeFolder = new File(resumeLocation);
-            if (resumeFolder.isDirectory()) {
-                listFiles(resumeFolder).forEach(file -> {
-                    Resume resume = new Resume(file.getName(), file.getAbsolutePath());
+
+            FileTypes.listFiles(resumeLocation, levelInside).forEach(file -> {
+                try {
+                    String fileName = file.getName();
+                    String id = fileName.substring(0, fileName.lastIndexOf('.'));
+                    String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                    String fileContent = FileTypes.parse(extension).parse(file);
+
+                    Map<String, Long> map = Transformers.wordFrequency(executor.applyRules(fileContent));
+
+                    Resume resume = new Resume(id, extension, file.getAbsolutePath(), map);
                     if (!repository.exists(resume.id())) {
                         repository.insert(resume);
                     }
-                });
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
-    }
-
-    private List<File> listFiles(File file) {
-        return listFiles(file, deep);
-    }
-
-    private List<File> listFiles(File file, int deep) {
-        if (file == null || !file.isDirectory()) {
-            return Collections.emptyList();
-        }
-        List<String> extensions = Arrays.asList(".pdf", ".doc");
-        List<File> files = Arrays.stream(file.listFiles(pathName -> pathName.isFile() &&
-                extensions.stream().anyMatch(extension -> pathName.getName().endsWith(extension))))
-                .collect(Collectors.toList());
-
-        if (deep != 0) {
-            Arrays.stream(file.listFiles(File::isDirectory))
-                    .forEach(dir -> files.addAll(listFiles(dir, deep - 1)));
-        }
-        return files;
     }
 }

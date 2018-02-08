@@ -1,6 +1,5 @@
 package com.epam.resume;
 
-import com.epam.resume.gateway.Resume;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
