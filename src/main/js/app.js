@@ -30,7 +30,7 @@ class ResumeSearch extends React.Component {
 
         var experience = document.querySelector('#exp').value;
 
-        this.retrieveResumes({skills, experience}, 0, []);
+        this.retrieveResumes({skills, experience, sort: 'experience'}, 0, []);
     }
 
     componentWillUnmount() {
@@ -41,7 +41,7 @@ class ResumeSearch extends React.Component {
         client({
             method: 'POST',
             entity: data,
-            path: '/resumes?page=' + page,
+            path: '/resume/search?page=' + page,
             headers: {'Content-Type': 'application/json'}
         }).done(response => {
             this.setState({
@@ -69,11 +69,11 @@ class ResumeSearch extends React.Component {
                     <div className='input-group-prepend'>
                         <span className='input-group-text'>Total </span>
                     </div>
-                    <input type='number' className='form-control' id='exp'></input>
+                    <input type='number' className='form-control' placeholder='Experience...' id='exp'></input>
                     <div className='input-group-append'>
                         <span className='input-group-text'>years of experience in </span>
                     </div>
-                    <input type='text' className='form-control' id='skills'></input>
+                    <input type='text' className='form-control' placeholder='Skills...' id='skills'></input>
                     <div className='input-group-append'>
                         <button className='btn btn-outline-secondary' type='button' onClick={this.onClick}>Search...</button>
                     </div>
@@ -86,13 +86,26 @@ class ResumeSearch extends React.Component {
 
 class ResumeList extends React.Component {
     render() {
-        var resumes = this.props.resumes.map(resume =>
-            <Resume key={resume.fileName} resume={resume}/>
+        var resumes = this.props.resumes.map((resume, index) =>
+            <Resume key={resume.fileName} index={index} resume={resume}/>
         );
         return (
-            <table className='table table-hover'>
-                {resumes}
-            </table>
+            <div className='table-responsive'>
+                <table className='table table-hover'>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Skills</th>
+                            <th>Experience</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {resumes}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 }
@@ -105,18 +118,17 @@ class Resume extends React.Component {
 
     onClick(e) {
         e.preventDefault();
-        window.open(`open/${this.props.resume.id}`);
+        window.open(`/resume/open/${this.props.resume.id}`);
     }
 
     render() {
         return (
             <tr>
+                <td>{this.props.index + 1}</td>
                 <td>{this.props.resume.id}</td>
-                <td>
-                    <a href='#' className="card-link" onClick={this.onClick}>{this.props.resume.fileName}</a>
-                </td>
-                <td>{this.props.resume.exp}</td>
                 <td>{this.props.resume.skills.join(', ')}</td>
+                <td>{this.props.resume.exp}</td>
+                <td><a href='#' className="card-link" onClick={this.onClick}>{this.props.resume.fileName}</a></td>
             </tr>
         )
     }
