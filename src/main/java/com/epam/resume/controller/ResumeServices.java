@@ -1,5 +1,6 @@
 package com.epam.resume.controller;
 
+import com.epam.common.Constants;
 import com.epam.resume.Resume;
 import com.epam.query.ResumeQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +24,15 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/resume")
 public class ResumeServices {
 
-    private final static long PAGE_SIZE = 20L;
+    private static final long PAGE_SIZE = 20L;
+    private static final String YEAR = "year";
 
     @Autowired
     private MongoTemplate template;
 
-    @GetMapping(value = "/open/{id:.+}")
-    public ResponseEntity<InputStreamResource> retrieveResume(@PathVariable("id") String resumeId) throws IOException {
-        Resume resume = template.findOne(new Query(Criteria.where("id").is(resumeId)), Resume.class);
+    @GetMapping(value = "/open/{fileName:.+}")
+    public ResponseEntity<InputStreamResource> retrieveResume(@PathVariable("fileName") String fileName) throws IOException {
+        Resume resume = template.findOne(new Query(Criteria.where(Constants.Resume.FILE_NAME).is(fileName)), Resume.class);
         if (Objects.isNull(resume)) {
             return ResponseEntity.badRequest().build();
         }
@@ -39,7 +41,7 @@ public class ResumeServices {
 
         return ResponseEntity.ok()
                 .contentLength(resource.contentLength())
-                .header("Content-Disposition", "inline; filename=\"" + resume.fileName() + "\"" )
+                .header("Content-Disposition", "inline; filename=\"" + resume.fullName() + "\"")
                 .contentType(MediaType.parseMediaType("application/" + resume.extension()))
                 .body(new InputStreamResource(resource.getInputStream()));
     }
@@ -47,24 +49,26 @@ public class ResumeServices {
     @PostMapping(value = "/search", consumes = "application/json")
     public List<Resume> findByQuery(@RequestParam("page") int page, @RequestBody ResumeQuery query) {
 
-        Criteria ct = Criteria.where("experience").gte(query.experience());
-        Criteria[] criteria = query.skills().stream().map(s -> Criteria.where("skills").regex(s))
-                .collect(Collectors.toList()).toArray(new Criteria[query.skills().size()]);
-        if (criteria.length > 0) {
-            ct = ct.andOperator(criteria);
+        Criteria ct = Criteria.where(Constants.EXPERIENCE).gte(query.experience());
+        if (query.skills().size() > 0) {
+            ct.andOperator(query.skills().stream()
+                    .map(s -> Criteria.where(Constants.Resume.WORDS + "." + s).exists(true))
+                    .collect(Collectors.toList()).toArray(new Criteria[query.skills().size()]));
         }
 
-        Aggregation pipeline = Aggregation.newAggregation(
-                Aggregation.project("skills", "fileName", "filePath", "graduation", "extension")
-                        .and(LiteralOperators.valueOf(Calendar.getInstance().get(Calendar.YEAR)).asLiteral()).as("year"),
-                Aggregation.project("skills", "fileName", "filePath", "graduation", "extension")
-                        .and("year").minus("graduation").as("experience"),
-                Aggregation.match(ct),
-                Aggregation.sort(new Sort(Sort.Direction.DESC, query.sort())),
-                Aggregation.skip(page * PAGE_SIZE),
-                Aggregation.limit(PAGE_SIZE),
-                Aggregation.project("skills", "extension", "filePath", "graduation"));
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        ProjectionOperation defaultProjection = Aggregation.project(Constants.Resume.WORDS, Constants.Resume.EMAIL,
+                Constants.Resume.FILE_PATH, Constants.Resume.GRADUATION,
+                Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME);
 
-        return template.aggregate(pipeline, "resume", Resume.class).getMappedResults();
+        Aggregation pipeline = Aggregation.newAggregation(
+                defaultProjection.and(LiteralOperators.valueOf(currentYear).asLiteral()).as(YEAR),
+                defaultProjection.and(YEAR).minus(Constants.Resume.GRADUATION).as(Constants.EXPERIENCE),
+                Aggregation.match(ct),
+                Aggregation.sort(Sort.Direction.DESC, query.sort()),
+                Aggregation.skip(page * PAGE_SIZE),
+                Aggregation.limit(PAGE_SIZE));
+
+        return template.aggregate(pipeline, Constants.Resume.COLLECTION_NAME, Resume.class).getMappedResults();
     }
 }

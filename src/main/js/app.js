@@ -46,8 +46,8 @@ class ResumeSearch extends React.Component {
         }).done(response => {
             this.setState({
                 next: page + 1, data,
-                done: response.entity.length === 0,
-                resumes: resumes.concat(response.entity)
+                isDone: response.entity.length === 0,
+                resumes: [...resumes, ...response.entity]
             });
         });
     }
@@ -57,7 +57,7 @@ class ResumeSearch extends React.Component {
         var scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
         var clientHeight = document.documentElement.clientHeight || window.innerHeight;
 
-        if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && !this.state.done) {
+        if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && !this.state.isDone) {
             this.retrieveResumes(this.state.data, this.state.next, this.state.resumes);
         }
     }
@@ -87,7 +87,7 @@ class ResumeSearch extends React.Component {
 class ResumeList extends React.Component {
     render() {
         var resumes = this.props.resumes.map((resume, index) =>
-            <Resume key={resume.fileName} index={index} resume={resume}/>
+            <Resume key={resume.id} index={index} resume={resume}/>
         );
         return (
             <div className='table-responsive'>
@@ -95,10 +95,9 @@ class ResumeList extends React.Component {
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Name</th>
-                            <th>Skills</th>
+                            <th>Resume</th>
+                            <th>Email</th>
                             <th>Experience</th>
-                            <th>Download</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,17 +117,16 @@ class Resume extends React.Component {
 
     onClick(e) {
         e.preventDefault();
-        window.open(`/resume/open/${this.props.resume.id}`);
+        window.open(`/resume/open/${this.props.resume.fileName}`);
     }
 
     render() {
         return (
             <tr>
                 <td>{this.props.index + 1}</td>
-                <td>{this.props.resume.id}</td>
-                <td>{this.props.resume.skills.join(', ')}</td>
-                <td>{this.props.resume.exp}</td>
                 <td><a href='#' className="card-link" onClick={this.onClick}>{this.props.resume.fileName}</a></td>
+                <td>{this.props.resume.email}</td>
+                <td>{this.props.resume.experience}</td>
             </tr>
         )
     }

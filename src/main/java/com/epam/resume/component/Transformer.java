@@ -1,5 +1,7 @@
 package com.epam.resume.component;
 
+import com.epam.common.Constants;
+import com.epam.file.FileTypes;
 import com.epam.resume.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,6 +9,8 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -15,17 +19,21 @@ class Transformer {
     @Autowired
     private RuleExecutor executor;
 
-    private Map<String, Long> wordFrequency(String s) {
-        return Arrays.stream(s.split(" ")).collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+    private Map<String, Long> wordFrequency(String string) {
+        return Arrays.stream(string.split(Constants.SPACE)).collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 
-    Resume createResume(File file) throws IOException {
-        String fileName = file.getName();
-        String id = fileName.substring(0, fileName.lastIndexOf('.'));
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);/*
-        String fileContent = FileTypes.parse(extension).parse(file);
+    private String email(String string) {
+        String email = "";
+        Matcher match = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(string);
+        if (match.find()) {
+            email = match.group();
+        }
+        return email;
+    }
 
-        Matcher matcher = Pattern.compile("19[89][0-9]|20[0-1][0-9]").matcher(fileContent);
+    private int graduationYear(String string) {
+        Matcher matcher = Pattern.compile("19[89][0-9]|20[0-1][0-9]").matcher(string);
         Set<Integer> numbers = new HashSet<>();
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
@@ -50,9 +58,18 @@ class Transformer {
                 }
             }
         }
+        return graduationYear;
+    }
 
-        Map<String, Long> map = wordFrequency(executor.applyRules(fileContent));*/
+    Resume createResume(File file) throws IOException {
+        String fileFullName = file.getName();
+        String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.'));
+        String extension = fileFullName.substring(fileFullName.lastIndexOf('.') + 1);
+        String fileContent = FileTypes.parse(extension).parse(file);
+        String filePath = file.getAbsolutePath();
 
-        return new Resume(id, extension, file.getAbsolutePath(), 1990 + (int) (Math.random() * 20), Collections.emptyList());
+        Map<String, Long> frequency = wordFrequency(executor.applyRules(fileContent));
+
+        return new Resume(email(fileContent), fileName, extension, filePath, graduationYear(fileContent), frequency);
     }
 }

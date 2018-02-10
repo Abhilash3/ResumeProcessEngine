@@ -1,5 +1,6 @@
 package com.epam.file;
 
+import com.epam.common.Constants;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 
 public abstract class FileTypes {
 
-    private static FileTypes pdf = new FileTypes("pdf") {
+    private static FileTypes pdf = new FileTypes(Constants.FileTypes.PDF) {
         @Override
         public String parse(File file) throws IOException {
             PDFTextStripper stripper = new PDFTextStripper();
@@ -28,7 +29,7 @@ public abstract class FileTypes {
         }
     };
 
-    private static FileTypes doc = new FileTypes("doc") {
+    private static FileTypes doc = new FileTypes(Constants.FileTypes.DOC) {
         @Override
         public String parse(File file) throws IOException {
             StringBuilder sb = new StringBuilder();

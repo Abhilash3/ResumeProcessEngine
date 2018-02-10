@@ -1,5 +1,6 @@
 package com.epam.query.component;
 
+import com.epam.common.Constants;
 import com.epam.query.ResumeQuery;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -19,10 +20,10 @@ public class ResumeQueryDeserializer extends JsonDeserializer<ResumeQuery> {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
         List<String> skills = new ArrayList<>();
-        node.get("skills").elements().forEachRemaining(jsonNode -> skills.add(jsonNode.asText()));
+        node.get(Constants.SKILLS).elements().forEachRemaining(jsonNode -> skills.add(jsonNode.asText()));
 
-        int exp = node.get("experience").asInt();
-        String sort = node.get("sort").asText();
+        int exp = node.get(Constants.EXPERIENCE).asInt();
+        String sort = node.get(Constants.SORT).asText();
 
         return new ResumeQuery(skills, exp, sort);
     }
