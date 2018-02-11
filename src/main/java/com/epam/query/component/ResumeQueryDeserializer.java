@@ -20,10 +20,10 @@ public class ResumeQueryDeserializer extends JsonDeserializer<ResumeQuery> {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
         List<String> skills = new ArrayList<>();
-        node.get(Constants.SKILLS).elements().forEachRemaining(jsonNode -> skills.add(jsonNode.asText()));
+        node.get(Constants.SKILLS).elements().forEachRemaining(jsonNode -> skills.add(jsonNode.asText().toLowerCase()));
 
         int exp = node.get(Constants.EXPERIENCE).asInt();
-        String sort = node.get(Constants.SORT).asText();
+        String sort = node.get(Constants.SORT).asText().toLowerCase();
 
         return new ResumeQuery(skills, exp, sort);
     }

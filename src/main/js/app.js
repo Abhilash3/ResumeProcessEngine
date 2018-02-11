@@ -19,25 +19,27 @@ class ResumeSearch extends React.Component {
         this.onClick = this.onClick.bind(this);
     }
 
-    onClick(e) {
-        e.preventDefault();
-        if (this.state.next === 0) {
-            window.addEventListener('scroll', this.onScroll, false);
-        }
-
-        var skills = document.querySelector('#skills').value.split(',')
-            .map(a => a.trim()).filter(a => a.length > 0);
-
-        var experience = document.querySelector('#exp').value;
-
-        this.retrieveResumes({skills, experience, sort: 'experience'}, 0, []);
+    componentWillMount() {
+        window.addEventListener('scroll', this.onScroll, false);
     }
 
     componentWillUnmount() {
         window.removeEventListener('scroll', this.onScroll, false);
     }
 
+    onClick(e) {
+        e.preventDefault();
+
+        var skills = document.querySelector('#skills').value.split(',')
+            .map(a => a.trim()).filter(a => a.length > 0);
+
+        var experience = document.querySelector('#exp').value || 0;
+
+        this.retrieveResumes({skills, experience, sort: 'experience'}, 0, []);
+    }
+
     retrieveResumes(data, page, resumes) {
+        this.setState({pending: true});
         client({
             method: 'POST',
             entity: data,
@@ -45,8 +47,8 @@ class ResumeSearch extends React.Component {
             headers: {'Content-Type': 'application/json'}
         }).done(response => {
             this.setState({
-                next: page + 1, data,
-                isDone: response.entity.length === 0,
+                next: page + 1, data, pending: false,
+                elementsReceived: response.entity.length !== 0,
                 resumes: [...resumes, ...response.entity]
             });
         });
@@ -57,7 +59,7 @@ class ResumeSearch extends React.Component {
         var scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
         var clientHeight = document.documentElement.clientHeight || window.innerHeight;
 
-        if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && !this.state.isDone) {
+        if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && this.state.elementsReceived && !this.state.pending) {
             this.retrieveResumes(this.state.data, this.state.next, this.state.resumes);
         }
     }

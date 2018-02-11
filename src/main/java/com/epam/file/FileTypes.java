@@ -47,12 +47,6 @@ public abstract class FileTypes {
         this.extension = extension;
     }
 
-    public abstract String parse(File file) throws IOException;
-
-    private String extension() {
-        return extension;
-    }
-
     @SuppressWarnings("ConstantConditions")
     public static FileTypes parse(String extension) {
         return Stream.of(pdf, doc).filter(fileType -> fileType.extension().equals(extension)).findFirst().get();
@@ -78,5 +72,11 @@ public abstract class FileTypes {
                     .forEach(dir -> files.addAll(listFiles(dir, level - 1)));
         }
         return files;
+    }
+
+    public abstract String parse(File file) throws IOException;
+
+    private String extension() {
+        return extension;
     }
 }

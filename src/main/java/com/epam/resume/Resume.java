@@ -11,6 +11,7 @@ import java.util.Objects;
 public class Resume {
 
     @Id
+    private final String id;
     private final String email;
     private final String extension;
     private final String fileName;
@@ -20,6 +21,7 @@ public class Resume {
     private final int graduation;
 
     public Resume(String email, String fileName, String extension, String filePath, int graduation, Map<String, Long> words) {
+        this.id = email;
         this.email = email;
         this.fileName = fileName;
         this.extension = extension;
@@ -34,6 +36,7 @@ public class Resume {
         if (o == null || getClass() != o.getClass()) return false;
         Resume resume = (Resume) o;
         return graduation == resume.graduation &&
+                Objects.equals(id, resume.id) &&
                 Objects.equals(email, resume.email) &&
                 Objects.equals(extension, resume.extension) &&
                 Objects.equals(fileName, resume.fileName) &&
@@ -43,11 +46,11 @@ public class Resume {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, extension, fileName, filePath, words, graduation);
+        return Objects.hash(id, email, extension, fileName, filePath, words, graduation);
     }
 
     public String id() {
-        return email;
+        return id;
     }
 
     public String email() {

@@ -38,22 +38,17 @@ class Transformer {
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
         }
-        int[] years = new int[numbers.size()];
-        int index = 0;
-        for(Integer year : numbers) {
-            years[index++] = year;
-        }
-
-        Arrays.sort(years);
+        List<Integer> years = new ArrayList<>(numbers);
+        years.sort(Comparator.comparingInt(a -> a));
 
         int graduationYear = 2000;
         outer:
-        for (int i = 0; i < years.length - 1; i++) {
-            for (int j = i + 1; j < years.length; j++) {
-                if (years[j] - years[i] > 6) {
+        for (int i = 0; i < years.size() - 1; i++) {
+            for (int j = i + 1; j < years.size(); j++) {
+                if (years.get(j) - years.get(i) > 6) {
                     break;
-                } else if (years[j] - years[i] >= 4) {
-                    graduationYear = years[j];
+                } else if (years.get(j) - years.get(i) >= 4) {
+                    graduationYear = years.get(j);
                     break outer;
                 }
             }
