@@ -2,14 +2,24 @@ package com.epam.common;
 
 public class Constants {
 
+    public static final String BLANK = "";
     public static final String SPACE = " ";
     public static final String SORT = "sort";
     public static final String SKILLS = "skills";
+    public static final String RELEVANCE = "relevance";
     public static final String EXPERIENCE = "experience";
 
     public static class FileTypes {
         public static final String PDF = "pdf";
         public static final String DOC = "doc";
+    }
+
+    public static class Patterns {
+        public static final String EMAIL = "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+";
+        public static final String CONTROL_CHARACTERS = "[\\p{Cntrl}&&[^\r\n\t]]";
+        public static final String ALL_EXCEPT_ALPHANUMERIC = "[^a-zA-Z0-9 ]";
+        public static final String WHITESPACES = "[\\s]+";
+        public static final String YEARS = "\\b\\d{4}\\b";
     }
 
     public static class Resume {
@@ -21,6 +31,6 @@ public class Constants {
         public static final String GRADUATION = "graduation";
         public static final String WORDS = "words";
 
-        public static final String COLLECTION_NAME = "resume";
+        public static final String COLLECTION = "resume";
     }
 }

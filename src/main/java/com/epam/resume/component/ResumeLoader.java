@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 
 @Component
@@ -27,13 +28,20 @@ public class ResumeLoader implements CommandLineRunner {
 
     @Override
     public void run(String... strings) {
-        if (repository.count() == 0) {
+        if (repository.count() != 0) {
             repository.deleteAll();
 
             FileTypes.listFiles(resumeLocation, levelInside).forEach(file -> {
                 try {
-                    Resume resume = transformer.createResume(file);
-                    if (!repository.exists(resume.id())) {
+                    Resume resume = transformer.resumeFrom(file);
+
+                    if (repository.exists(resume.id())) {
+                        Resume existing = repository.findOne(resume.id());
+                        if (file.lastModified() > new File(existing.filePath()).lastModified()) {
+                            repository.delete(existing);
+                            repository.insert(resume);
+                        }
+                    } else {
                         repository.insert(resume);
                     }
                 } catch (IOException e) {

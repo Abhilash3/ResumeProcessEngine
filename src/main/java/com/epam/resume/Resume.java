@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Map;
 import java.util.Objects;
 
-@Document(collection = Constants.Resume.COLLECTION_NAME)
+@Document(collection = Constants.Resume.COLLECTION)
 public class Resume {
 
     @Id

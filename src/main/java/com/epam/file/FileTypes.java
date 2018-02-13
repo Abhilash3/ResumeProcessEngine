@@ -4,7 +4,6 @@ import com.epam.common.Constants;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.usermodel.Range;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,27 +16,17 @@ import java.util.stream.Stream;
 
 public abstract class FileTypes {
 
-    private static FileTypes pdf = new FileTypes(Constants.FileTypes.PDF) {
+    private static final FileTypes pdf = new FileTypes(Constants.FileTypes.PDF) {
         @Override
         public String parse(File file) throws IOException {
-            PDFTextStripper stripper = new PDFTextStripper();
-            stripper.setSortByPosition(false);
-            stripper.setShouldSeparateByBeads(true);
-            stripper.setStartPage(1);
-            stripper.setEndPage(Integer.MAX_VALUE);
-            return stripper.getText(PDDocument.load(file));
+            return new PDFTextStripper().getText(PDDocument.load(file));
         }
     };
 
-    private static FileTypes doc = new FileTypes(Constants.FileTypes.DOC) {
+    private static final FileTypes doc = new FileTypes(Constants.FileTypes.DOC) {
         @Override
         public String parse(File file) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            Range range = new HWPFDocument(new FileInputStream(file)).getRange();
-            for (int i = 0; i < range.numParagraphs(); i++) {
-                sb.append(range.getParagraph(i).text());
-            }
-            return sb.toString();
+            return new HWPFDocument(new FileInputStream(file)).getText().toString();
         }
     };
 
@@ -57,19 +46,19 @@ public abstract class FileTypes {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static List<File> listFiles(File file, int level) {
-        if (file == null || !file.isDirectory()) {
+    private static List<File> listFiles(File dir, int level) {
+        if (dir == null || !dir.isDirectory()) {
             return Collections.emptyList();
         }
         List<String> extensions = Stream.of(pdf, doc).map(FileTypes::extension).collect(Collectors.toList());
 
-        List<File> files = Arrays.stream(file.listFiles(
-                fileToCheck -> fileToCheck.isFile() && extensions.stream().anyMatch(
-                        extension -> fileToCheck.getName().endsWith(extension)))).collect(Collectors.toList());
+        List<File> files = Arrays.stream(dir.listFiles(file ->
+                file.isFile() && extensions.stream().anyMatch(extension -> file.getName().endsWith(extension)))
+        ).collect(Collectors.toList());
 
         if (level != 0) {
-            Arrays.stream(file.listFiles(File::isDirectory))
-                    .forEach(dir -> files.addAll(listFiles(dir, level - 1)));
+            Arrays.stream(dir.listFiles(File::isDirectory))
+                    .forEach(innerDir -> files.addAll(listFiles(innerDir, level - 1)));
         }
         return files;
     }

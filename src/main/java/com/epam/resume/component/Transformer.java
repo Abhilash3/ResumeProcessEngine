@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @Component
 class Transformer {
 
+    private static final String NO_EMAIL = "No Email";
+
     @Autowired
     private RuleExecutor executor;
 
@@ -23,9 +25,10 @@ class Transformer {
         return Arrays.stream(string.split(Constants.SPACE)).collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 
-    private String email(String string) {
-        String email = "";
-        Matcher match = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+").matcher(string);
+    private String emailId(String string) {
+        String email = NO_EMAIL;
+        Matcher match = Pattern.compile(Constants.Patterns.EMAIL).matcher(string);
+
         if (match.find()) {
             email = match.group();
         }
@@ -33,38 +36,49 @@ class Transformer {
     }
 
     private int graduationYear(String string) {
-        Matcher matcher = Pattern.compile("19[89][0-9]|20[0-1][0-9]").matcher(string);
+        Matcher matcher = Pattern.compile(Constants.Patterns.YEARS).matcher(string);
         Set<Integer> numbers = new HashSet<>();
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
         }
-        List<Integer> years = new ArrayList<>(numbers);
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        List<Integer> years = numbers.stream()
+                .filter(a -> a <= currentYear && a >= currentYear - 30)
+                .collect(Collectors.toList());
+
         years.sort(Comparator.comparingInt(a -> a));
 
-        int graduationYear = 2000;
-        outer:
-        for (int i = 0; i < years.size() - 1; i++) {
-            for (int j = i + 1; j < years.size(); j++) {
-                if (years.get(j) - years.get(i) > 6) {
-                    break;
-                } else if (years.get(j) - years.get(i) >= 4) {
-                    graduationYear = years.get(j);
-                    break outer;
+        int graduationYear = 0;
+
+        if (years.size() == 1) {
+            graduationYear = years.get(0);
+        } else if (years.size() == 2) {
+            graduationYear = years.get(1);
+        } else {
+            outer:
+            for (int i = 0; i < years.size() - 1; i++) {
+                for (int j = i + 1; j < years.size(); j++) {
+                    if (years.get(j) - years.get(i) > 7) {
+                        break;
+                    } else if (years.get(j) - years.get(i) >= 4) {
+                        graduationYear = years.get(j);
+                        break outer;
+                    }
                 }
             }
         }
         return graduationYear;
     }
 
-    Resume createResume(File file) throws IOException {
+    Resume resumeFrom(File file) throws IOException {
         String fileFullName = file.getName();
-        String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.'));
+        String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.')).trim();
         String extension = fileFullName.substring(fileFullName.lastIndexOf('.') + 1);
         String fileContent = FileTypes.parse(extension).parse(file);
         String filePath = file.getAbsolutePath();
 
         Map<String, Long> frequency = wordFrequency(executor.applyRules(fileContent));
 
-        return new Resume(email(fileContent), fileName, extension, filePath, graduationYear(fileContent), frequency);
+        return new Resume(emailId(fileContent), fileName, extension, filePath, graduationYear(fileContent), frequency);
     }
 }

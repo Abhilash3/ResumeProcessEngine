@@ -35,7 +35,9 @@ class ResumeSearch extends React.Component {
 
         var experience = document.querySelector('#exp').value || 0;
 
-        this.retrieveResumes({skills, experience, sort: 'experience'}, 0, []);
+        var sort = document.querySelector('#sort').value;
+
+        this.retrieveResumes({skills, experience, sort}, 0, []);
     }
 
     retrieveResumes(data, page, resumes) {
@@ -73,9 +75,16 @@ class ResumeSearch extends React.Component {
                     </div>
                     <input type='number' className='form-control' placeholder='Experience...' id='exp'></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text'>years of experience in </span>
+                        <span className='input-group-text'> years of experience in </span>
                     </div>
                     <input type='text' className='form-control' placeholder='Skills...' id='skills'></input>
+                    <div className='input-group-append'>
+                        <span className='input-group-text'> sorted by </span>
+                    </div>
+                    <select className='custom-select' id='sort'>
+                        <option value='relevance'>Relevance</option>
+                        <option value='experience'>Experience</option>
+                    </select>
                     <div className='input-group-append'>
                         <button className='btn btn-outline-secondary' type='button' onClick={this.onClick}>Search...</button>
                     </div>
