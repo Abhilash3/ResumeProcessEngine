@@ -28,26 +28,24 @@ public class ResumeLoader implements CommandLineRunner {
 
     @Override
     public void run(String... strings) {
-        if (repository.count() != 0) {
-            repository.deleteAll();
+        repository.deleteAll();
 
-            FileTypes.listFiles(resumeLocation, levelInside).forEach(file -> {
-                try {
-                    Resume resume = transformer.resumeFrom(file);
+        FileTypes.listFiles(resumeLocation, levelInside).forEach(file -> {
+            try {
+                Resume resume = transformer.resumeFrom(file);
 
-                    if (repository.exists(resume.id())) {
-                        Resume existing = repository.findOne(resume.id());
-                        if (file.lastModified() > new File(existing.filePath()).lastModified()) {
-                            repository.delete(existing);
-                            repository.insert(resume);
-                        }
-                    } else {
+                if (repository.exists(resume.id())) {
+                    Resume existing = repository.findOne(resume.id());
+                    if (file.lastModified() > new File(existing.filePath()).lastModified()) {
+                        repository.delete(existing);
                         repository.insert(resume);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } else {
+                    repository.insert(resume);
                 }
-            });
-        }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

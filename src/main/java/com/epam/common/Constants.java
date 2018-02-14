@@ -2,7 +2,7 @@ package com.epam.common;
 
 public class Constants {
 
-    public static final String BLANK = "";
+    public static final String PERIOD = ".";
     public static final String SPACE = " ";
     public static final String SORT = "sort";
     public static final String SKILLS = "skills";

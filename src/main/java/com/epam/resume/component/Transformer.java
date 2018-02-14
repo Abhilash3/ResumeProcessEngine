@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 class Transformer {
 
-    private static final String NO_EMAIL = "No Email";
+    private static final String NO_EMAIL = "Email not found";
 
     @Autowired
     private RuleExecutor executor;

@@ -13,12 +13,19 @@ import java.util.Calendar;
 @JsonComponent
 public class ResumeSerializer extends JsonSerializer<Resume> {
 
+    private static final String NO_EXPERIENCE = "Experience not found";
+
     @Override
     public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField(Constants.Resume.ID, resume.id());
         jsonGenerator.writeStringField(Constants.Resume.FILE_NAME, resume.fileName());
-        jsonGenerator.writeNumberField(Constants.EXPERIENCE, Calendar.getInstance().get(Calendar.YEAR) - resume.graduation());
+        int graduationYear = resume.graduation();
+        String experience = NO_EXPERIENCE;
+        if (graduationYear != 0) {
+            experience = String.valueOf(Calendar.getInstance().get(Calendar.YEAR) - graduationYear);
+        }
+        jsonGenerator.writeStringField(Constants.EXPERIENCE, experience);
         jsonGenerator.writeObjectField(Constants.Resume.EMAIL, resume.email());
         jsonGenerator.writeEndObject();
     }

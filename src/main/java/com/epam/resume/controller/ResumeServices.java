@@ -8,10 +8,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
-import org.springframework.data.mongodb.core.aggregation.LiteralOperators;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
@@ -28,8 +25,18 @@ import java.util.Objects;
 @RequestMapping(value = "/resume")
 public class ResumeServices {
 
-    private static final long PAGE_SIZE = 20L;
-    private static final String YEAR = "year";
+    private static final long ELEMENTS_SIZE = 20L;
+
+    private static final ProjectionOperation PROJECTING_RESUME_WITH_EXPERIENCE = Aggregation.project(
+            Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH,
+            Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME
+    ).and(ConditionalOperators.Cond
+            .when(Criteria.where(Constants.Resume.GRADUATION).is(0)).then(-1)
+            .otherwiseValueOf(ArithmeticOperators.Subtract
+                    .valueOf(Calendar.getInstance().get(Calendar.YEAR))
+                    .subtract(Constants.Resume.GRADUATION))).as(Constants.EXPERIENCE);
+
+    private static final Sort SORT_BY_EMAIL = new Sort(Sort.Direction.ASC, Constants.Resume.EMAIL);
 
     @Autowired
     private MongoTemplate template;
@@ -53,32 +60,26 @@ public class ResumeServices {
     @PostMapping(value = "/search", consumes = "application/json")
     public List<Resume> findByQuery(@RequestParam("page") int page, @RequestBody ResumeQuery query) {
 
-        Criteria ct = Criteria.where(Constants.EXPERIENCE).gte(query.experience());
+        Criteria ct = new Criteria().orOperator(
+                Criteria.where(Constants.EXPERIENCE).is(-1),
+                Criteria.where(Constants.EXPERIENCE).gte(query.experience()));
 
         List<String> skills = query.skills();
-        ArithmeticOperators.Add relevance = ArithmeticOperators.Add.valueOf(1);
+        ArithmeticOperators.Add resumeRelevance = ArithmeticOperators.Add.valueOf(0);
         for (String skill : skills) {
-            String field = Constants.Resume.WORDS + "." + skill;
+            String field = Constants.Resume.WORDS + Constants.PERIOD + skill;
             ct = ct.and(field).exists(true);
-            relevance = relevance.add(field);
+            resumeRelevance = resumeRelevance.add(field);
         }
 
-        Sort sortOrder = new Sort(Sort.Direction.DESC, query.sort()).and(
-                new Sort(Sort.Direction.ASC, Constants.Resume.EMAIL));
-
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        ProjectionOperation project = Aggregation.project(Constants.Resume.WORDS, Constants.Resume.EMAIL,
-                Constants.Resume.FILE_PATH, Constants.Resume.GRADUATION,
-                Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME);
+        Sort sortOrder = new Sort(Sort.Direction.DESC, query.sort()).and(SORT_BY_EMAIL);
 
         Aggregation pipeline = Aggregation.newAggregation(
-                project.and(LiteralOperators.valueOf(currentYear).asLiteral()).as(YEAR),
-                project.and(YEAR).minus(Constants.Resume.GRADUATION).as(Constants.EXPERIENCE),
+                PROJECTING_RESUME_WITH_EXPERIENCE.and(resumeRelevance).as(Constants.RELEVANCE),
                 Aggregation.match(ct),
-                project.andInclude(Constants.EXPERIENCE).and(relevance).as(Constants.RELEVANCE),
                 Aggregation.sort(sortOrder),
-                Aggregation.skip(page * PAGE_SIZE),
-                Aggregation.limit(PAGE_SIZE));
+                Aggregation.skip(page * ELEMENTS_SIZE),
+                Aggregation.limit(ELEMENTS_SIZE));
 
         return template.aggregate(pipeline, Constants.Resume.COLLECTION, Resume.class).getMappedResults();
     }

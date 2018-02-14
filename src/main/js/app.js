@@ -45,7 +45,7 @@ class ResumeSearch extends React.Component {
         client({
             method: 'POST',
             entity: data,
-            path: '/resume/search?page=' + page,
+            path: `/resume/search?page=${page}`,
             headers: {'Content-Type': 'application/json'}
         }).done(response => {
             this.setState({
@@ -135,7 +135,7 @@ class Resume extends React.Component {
         return (
             <tr>
                 <td>{this.props.index + 1}</td>
-                <td><a href='#' className="card-link" onClick={this.onClick}>{this.props.resume.fileName}</a></td>
+                <td><a href='#' className='card-link' onClick={this.onClick}>{this.props.resume.fileName}</a></td>
                 <td>{this.props.resume.email}</td>
                 <td>{this.props.resume.experience}</td>
             </tr>
@@ -145,5 +145,5 @@ class Resume extends React.Component {
 
 ReactDOM.render(
     <App />,
-    document.getElementById('react')
+    document.querySelector('#react')
 )
