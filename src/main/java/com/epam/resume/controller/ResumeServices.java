@@ -4,11 +4,15 @@ import com.epam.common.Constants;
 import com.epam.query.ResumeQuery;
 import com.epam.resume.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
@@ -25,8 +29,6 @@ import java.util.Objects;
 @RequestMapping(value = "/resume")
 public class ResumeServices {
 
-    private static final long ELEMENTS_SIZE = 20L;
-
     private static final ProjectionOperation PROJECTING_RESUME_WITH_EXPERIENCE = Aggregation.project(
             Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH,
             Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME
@@ -35,8 +37,12 @@ public class ResumeServices {
             .otherwiseValueOf(ArithmeticOperators.Subtract
                     .valueOf(Calendar.getInstance().get(Calendar.YEAR))
                     .subtract(Constants.Resume.GRADUATION))).as(Constants.EXPERIENCE);
-
     private static final Sort SORT_BY_EMAIL = new Sort(Sort.Direction.ASC, Constants.Resume.EMAIL);
+
+    private static final long ELEMENTS_SIZE = 20L;
+
+    @Value("${application.resume.location}")
+    private String resumeLocation;
 
     @Autowired
     private MongoTemplate template;
@@ -48,7 +54,7 @@ public class ResumeServices {
             return ResponseEntity.badRequest().build();
         }
 
-        FileSystemResource resource = new FileSystemResource(new File(resume.filePath()));
+        FileSystemResource resource = new FileSystemResource(new File(resumeLocation + resume.filePath()));
 
         return ResponseEntity.ok()
                 .contentLength(resource.contentLength())

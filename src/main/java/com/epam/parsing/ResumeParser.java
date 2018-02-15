@@ -1,4 +1,4 @@
-package com.epam.resume.component;
+package com.epam.parsing;
 
 import com.epam.common.Constants;
 import com.epam.file.FileTypes;
@@ -14,15 +14,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
-class Transformer {
+class ResumeParser {
 
-    private static final String NO_EMAIL = "Email not found";
+    public static final String NO_EMAIL = "Email not found";
 
     @Autowired
     private RuleExecutor executor;
 
     private Map<String, Long> wordFrequency(String string) {
-        return Arrays.stream(string.split(Constants.SPACE)).collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        return Arrays.stream(string.split(Constants.SPACE))
+                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 
     private String emailId(String string) {
@@ -48,37 +49,51 @@ class Transformer {
 
         years.sort(Comparator.comparingInt(a -> a));
 
-        int graduationYear = 0;
+        int graduationYear = graduationBasedOnSmallDiff(years);
+        graduationYear = graduationYear == 0 ? graduationBasedOnLargeDiff(years) : graduationYear;
+        return graduationYear == 0 ? graduationAsSmallestYear(years) : graduationYear;
+    }
 
-        if (years.size() == 1) {
-            graduationYear = years.get(0);
-        } else if (years.size() == 2) {
-            graduationYear = years.get(1);
-        } else {
-            outer:
-            for (int i = 0; i < years.size() - 1; i++) {
-                for (int j = i + 1; j < years.size(); j++) {
-                    if (years.get(j) - years.get(i) > 7) {
-                        break;
-                    } else if (years.get(j) - years.get(i) >= 4) {
-                        graduationYear = years.get(j);
-                        break outer;
-                    }
+    private int graduationAsSmallestYear(List<Integer> years) {
+        return years.size() > 0 ? years.get(0) : 0;
+    }
+
+    private int graduationBasedOnLargeDiff(List<Integer> years) {
+        for (int i = 1; i < years.size(); i++) {
+            if (years.get(i) - years.get(i - 1) >= 10) {
+                return years.get(i);
+            }
+        }
+        return 0;
+    }
+
+    private int graduationBasedOnSmallDiff(List<Integer> years) {
+        for (int i = 0; i < years.size() - 1; i++) {
+            for (int j = i + 1; j < years.size(); j++) {
+                if (years.get(j) - years.get(i) > 7) {
+                    break;
+                } else if (years.get(j) - years.get(i) >= 4) {
+                    return years.get(j);
                 }
             }
         }
-        return graduationYear;
+        return 0;
     }
 
-    Resume resumeFrom(File file) throws IOException {
+    Resume resumeFrom(File file, String basePath) throws IOException {
         String fileFullName = file.getName();
         String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.')).trim();
         String extension = fileFullName.substring(fileFullName.lastIndexOf('.') + 1);
         String fileContent = FileTypes.parse(extension).parse(file);
-        String filePath = file.getAbsolutePath();
+        String filePath = file.getAbsolutePath().replaceAll("[\\\\]", "/").split(basePath)[1];
+        long lastModified = file.lastModified();
 
         Map<String, Long> frequency = wordFrequency(executor.applyRules(fileContent));
+        String email = emailId(fileContent);
+        int graduationYear = graduationYear(fileContent);
 
-        return new Resume(emailId(fileContent), fileName, extension, filePath, graduationYear(fileContent), frequency);
+        String id = NO_EMAIL.equals(email) ? filePath : email;
+
+        return new Resume(id, email, fileName, extension, filePath, lastModified, graduationYear, frequency);
     }
 }

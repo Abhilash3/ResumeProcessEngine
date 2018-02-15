@@ -16,16 +16,19 @@ public class Resume {
     private final String extension;
     private final String fileName;
     private final String filePath;
+    private final long lastModified;
 
     private final Map<String, Long> words;
     private final int graduation;
 
-    public Resume(String email, String fileName, String extension, String filePath, int graduation, Map<String, Long> words) {
-        this.id = email;
+    public Resume(String id, String email, String fileName, String extension, String filePath, long lastModified,
+                  int graduation, Map<String, Long> words) {
+        this.id = id;
         this.email = email;
         this.fileName = fileName;
         this.extension = extension;
         this.filePath = filePath;
+        this.lastModified = lastModified;
         this.graduation = graduation;
         this.words = words;
     }
@@ -67,6 +70,10 @@ public class Resume {
 
     public String filePath() {
         return filePath;
+    }
+
+    public long lastModified() {
+        return lastModified;
     }
 
     public Map<String, Long> words() {

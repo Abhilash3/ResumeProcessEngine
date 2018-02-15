@@ -1,4 +1,4 @@
-package com.epam.resume.component;
+package com.epam.parsing;
 
 import com.epam.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ class RuleExecutor {
     @Autowired
     private List<Rule> rules;
 
-    public String applyRules(String content) {
+    String applyRules(String content) {
         return rules.stream().reduce(content, (s, rule) -> rule.apply(s), (s1, s2) -> s1 + s2);
     }
 }
