@@ -1,6 +1,6 @@
 package com.epam.parsing;
 
-import com.epam.rule.Rule;
+import com.epam.parsing.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

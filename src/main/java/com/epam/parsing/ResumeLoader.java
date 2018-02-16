@@ -37,7 +37,7 @@ public class ResumeLoader {
                 .filter(file -> file.lastModified() >= lastRun)
                 .forEach(file -> {
                     try {
-                        Resume resume = parser.resumeFrom(file, resumeLocation);
+                        Resume resume = parser.resumeFrom(file);
 
                         if (repository.exists(resume.id())) {
                             Resume existing = repository.findOne(resume.id());

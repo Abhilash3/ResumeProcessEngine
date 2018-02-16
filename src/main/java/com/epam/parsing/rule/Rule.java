@@ -1,4 +1,4 @@
-package com.epam.rule;
+package com.epam.parsing.rule;
 
 public interface Rule {
 

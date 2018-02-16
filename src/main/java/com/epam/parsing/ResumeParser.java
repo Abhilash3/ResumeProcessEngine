@@ -4,6 +4,7 @@ import com.epam.common.Constants;
 import com.epam.file.FileTypes;
 import com.epam.resume.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -16,7 +17,10 @@ import java.util.stream.Collectors;
 @Component
 class ResumeParser {
 
-    public static final String NO_EMAIL = "Email not found";
+    private static final String NO_EMAIL = "Email not found";
+
+    @Value("${application.resume.location}")
+    private String basePath;
 
     @Autowired
     private RuleExecutor executor;
@@ -42,6 +46,10 @@ class ResumeParser {
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
         }
+
+        if (numbers.size() == 0) {
+            return 0;
+        }
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         List<Integer> years = numbers.stream()
                 .filter(a -> a <= currentYear && a >= currentYear - 30)
@@ -49,38 +57,30 @@ class ResumeParser {
 
         years.sort(Comparator.comparingInt(a -> a));
 
-        int graduationYear = graduationBasedOnSmallDiff(years);
-        graduationYear = graduationYear == 0 ? graduationBasedOnLargeDiff(years) : graduationYear;
-        return graduationYear == 0 ? graduationAsSmallestYear(years) : graduationYear;
-    }
+        if (years.size() == 1) {
+            years.get(0);
+        }
 
-    private int graduationAsSmallestYear(List<Integer> years) {
-        return years.size() > 0 ? years.get(0) : 0;
-    }
-
-    private int graduationBasedOnLargeDiff(List<Integer> years) {
-        for (int i = 1; i < years.size(); i++) {
-            if (years.get(i) - years.get(i - 1) >= 10) {
-                return years.get(i);
+        int start = 0;
+        if (checkForDOB(years)) {
+            start = 1;
+        }
+        int possibleGraduationYear = years.get(start);
+        for (int i = 1; i < 3 && i < years.size() - start; i++) {
+            int yearDiff = years.get(i + start) - possibleGraduationYear;
+            if (yearDiff >= 4 && yearDiff <= 7) {
+                possibleGraduationYear = years.get(i + start);
+                break;
             }
         }
-        return 0;
+        return possibleGraduationYear;
     }
 
-    private int graduationBasedOnSmallDiff(List<Integer> years) {
-        for (int i = 0; i < years.size() - 1; i++) {
-            for (int j = i + 1; j < years.size(); j++) {
-                if (years.get(j) - years.get(i) > 7) {
-                    break;
-                } else if (years.get(j) - years.get(i) >= 4) {
-                    return years.get(j);
-                }
-            }
-        }
-        return 0;
+    private boolean checkForDOB(List<Integer> years) {
+        return years.get(1) - years.get(0) >= 12;
     }
 
-    Resume resumeFrom(File file, String basePath) throws IOException {
+    Resume resumeFrom(File file) throws IOException {
         String fileFullName = file.getName();
         String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.')).trim();
         String extension = fileFullName.substring(fileFullName.lastIndexOf('.') + 1);

@@ -30,7 +30,7 @@ import java.util.Objects;
 public class ResumeServices {
 
     private static final ProjectionOperation PROJECTING_RESUME_WITH_EXPERIENCE = Aggregation.project(
-            Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH,
+            Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH, Constants.Resume.LAST_MODIFIED,
             Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME
     ).and(ConditionalOperators.Cond
             .when(Criteria.where(Constants.Resume.GRADUATION).is(0)).then(-1)

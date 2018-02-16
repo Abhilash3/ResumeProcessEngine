@@ -1,6 +1,5 @@
-package com.epam.rule.component;
+package com.epam.parsing.rule;
 
-import com.epam.rule.Rule;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
