@@ -2,6 +2,7 @@ package com.epam.common;
 
 public class Constants {
 
+    public static final String ID = "id";
     public static final String PERIOD = ".";
     public static final String SPACE = " ";
     public static final String SORT = "sort";
@@ -22,7 +23,7 @@ public class Constants {
     }
 
     public static class Resume {
-        public static final String ID = "id";
+        public static final String ID = "_id";
         public static final String EMAIL = "email";
         public static final String FILE_NAME = "fileName";
         public static final String FILE_PATH = "filePath";

@@ -18,7 +18,7 @@ public class ResumeSerializer extends JsonSerializer<Resume> {
     @Override
     public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeStringField(Constants.Resume.ID, resume.id());
+        jsonGenerator.writeStringField(Constants.ID, resume.id());
         jsonGenerator.writeStringField(Constants.Resume.FILE_NAME, resume.fileName());
         int graduationYear = resume.graduation();
         String experience = NO_EXPERIENCE;

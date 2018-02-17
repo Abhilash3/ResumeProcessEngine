@@ -53,6 +53,7 @@ class ResumeSearch extends React.Component {
                 elementsReceived: response.entity.length !== 0,
                 resumes: [...resumes, ...response.entity]
             });
+            this.onScroll();
         });
     }
 

@@ -31,13 +31,13 @@ public class ResumeServices {
 
     private static final ProjectionOperation PROJECTING_RESUME_WITH_EXPERIENCE = Aggregation.project(
             Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH, Constants.Resume.LAST_MODIFIED,
-            Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME
+            Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME, Constants.Resume.ID
     ).and(ConditionalOperators.Cond
             .when(Criteria.where(Constants.Resume.GRADUATION).is(0)).then(-1)
             .otherwiseValueOf(ArithmeticOperators.Subtract
                     .valueOf(Calendar.getInstance().get(Calendar.YEAR))
                     .subtract(Constants.Resume.GRADUATION))).as(Constants.EXPERIENCE);
-    private static final Sort SORT_BY_EMAIL = new Sort(Sort.Direction.ASC, Constants.Resume.EMAIL);
+    private static final Sort SORT_BY_ID = new Sort(Sort.Direction.ASC, Constants.Resume.ID);
 
     private static final long ELEMENTS_SIZE = 20L;
 
@@ -78,7 +78,7 @@ public class ResumeServices {
             resumeRelevance = resumeRelevance.add(field);
         }
 
-        Sort sortOrder = new Sort(Sort.Direction.DESC, query.sort()).and(SORT_BY_EMAIL);
+        Sort sortOrder = new Sort(Sort.Direction.DESC, query.sort()).and(SORT_BY_ID);
 
         Aggregation pipeline = Aggregation.newAggregation(
                 PROJECTING_RESUME_WITH_EXPERIENCE.and(resumeRelevance).as(Constants.RELEVANCE),
