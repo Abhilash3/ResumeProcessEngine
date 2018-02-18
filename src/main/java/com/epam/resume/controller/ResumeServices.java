@@ -42,7 +42,7 @@ public class ResumeServices {
     private static final long ELEMENTS_SIZE = 20L;
 
     @Value("${application.resume.location}")
-    private String resumeLocation;
+    private String basePath;
 
     @Autowired
     private MongoTemplate template;
@@ -54,7 +54,7 @@ public class ResumeServices {
             return ResponseEntity.badRequest().build();
         }
 
-        FileSystemResource resource = new FileSystemResource(new File(resumeLocation + resume.filePath()));
+        FileSystemResource resource = new FileSystemResource(new File(basePath + resume.filePath()));
 
         return ResponseEntity.ok()
                 .contentLength(resource.contentLength())
@@ -68,7 +68,9 @@ public class ResumeServices {
 
         Criteria ct = new Criteria().orOperator(
                 Criteria.where(Constants.EXPERIENCE).is(-1),
-                Criteria.where(Constants.EXPERIENCE).gte(query.experience()));
+                new Criteria().andOperator(
+                        Criteria.where(Constants.EXPERIENCE).gte(query.experience()[0]),
+                        Criteria.where(Constants.EXPERIENCE).lte(query.experience()[1])));
 
         List<String> skills = query.skills();
         ArithmeticOperators.Add resumeRelevance = ArithmeticOperators.Add.valueOf(0);

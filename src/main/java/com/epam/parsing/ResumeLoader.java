@@ -1,10 +1,11 @@
 package com.epam.parsing;
 
+import com.epam.common.Constants;
 import com.epam.file.FileTypes;
 import com.epam.resume.Resume;
-import com.epam.resume.repository.IResumeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ public class ResumeLoader {
     private int levelInside;
 
     @Autowired
-    private IResumeRepository repository;
+    private MongoTemplate template;
 
     @Autowired
     private ResumeParser parser;
@@ -38,15 +39,13 @@ public class ResumeLoader {
                 .forEach(file -> {
                     try {
                         Resume resume = parser.resumeFrom(file);
+                        Resume existing = template.findById(resume.id(), Resume.class);
 
-                        if (repository.exists(resume.id())) {
-                            Resume existing = repository.findOne(resume.id());
-                            if (resume.lastModified() > existing.lastModified()) {
-                                repository.delete(existing);
-                                repository.insert(resume);
-                            }
-                        } else {
-                            repository.insert(resume);
+                        if (existing == null) {
+                            template.insert(resume, Constants.Resume.COLLECTION);
+                        } else if (resume.lastModified() > existing.lastModified()) {
+                            template.remove(existing, Constants.Resume.COLLECTION);
+                            template.insert(resume, Constants.Resume.COLLECTION);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Order(1)
-public class KeepOnlyAlphanumeric implements Rule {
+public class KeepOnlyAlphanumeric implements IRule {
     @Override
     public String apply(String s) {
         return s.replaceAll(Constants.Patterns.ALL_EXCEPT_ALPHANUMERIC, Constants.SPACE);

@@ -46,20 +46,20 @@ class ResumeParser {
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
         }
-
-        if (numbers.size() == 0) {
-            return 0;
-        }
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         List<Integer> years = numbers.stream()
                 .filter(a -> a <= currentYear && a >= currentYear - 30)
                 .collect(Collectors.toList());
 
-        years.sort(Comparator.comparingInt(a -> a));
+        if (years.size() == 0) {
+            return 0;
+        }
 
         if (years.size() == 1) {
-            years.get(0);
+            return years.get(0);
         }
+
+        years.sort(Comparator.comparingInt(a -> a));
 
         int start = 0;
         if (checkForDOB(years)) {

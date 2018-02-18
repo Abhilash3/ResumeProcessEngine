@@ -33,7 +33,10 @@ class ResumeSearch extends React.Component {
         var skills = document.querySelector('#skills').value.split(',')
             .map(a => a.trim()).filter(a => a.length > 0);
 
-        var experience = document.querySelector('#exp').value || 0;
+        var experience = [
+            document.querySelector('#minExp').value || 0,
+            document.querySelector('#maxExp').value || 100,
+        ];
 
         var sort = document.querySelector('#sort').value;
 
@@ -67,20 +70,36 @@ class ResumeSearch extends React.Component {
         }
     }
 
+    onBlur(e) {
+        e.preventDefault();
+
+        var minExpInput = document.querySelector('#minExp');
+        var maxExpInput = document.querySelector('#maxExp');
+
+        var minValue = Number(minExpInput.value || 0);
+        var maxValue = Number(maxExpInput.value || 100);
+
+        if (minValue > maxValue) {
+            if (e.target === minExpInput) {
+                maxExpInput.value = minValue;
+            } else if (e.target === maxExpInput) {
+                minExpInput.value = maxValue;
+            }
+        }
+    }
+
     render() {
         return (
             <div>
                 <div className='input-group'>
-                    <div className='input-group-prepend'>
-                        <span className='input-group-text'>Total </span>
-                    </div>
-                    <input type='number' className='form-control' placeholder='Experience...' id='exp'></input>
+                    <input type='number' className='form-control' min='0' placeholder='Min...' id='minExp' onBlur={this.onBlur}></input>
+                    <input type='number' className='form-control' min='0' placeholder='Max...' id='maxExp' onBlur={this.onBlur}></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text'> years of experience in </span>
+                        <span className='input-group-text'>years of experience in</span>
                     </div>
                     <input type='text' className='form-control' placeholder='Skills...' id='skills'></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text'> sorted by </span>
+                        <span className='input-group-text'>sorted by</span>
                     </div>
                     <select className='custom-select' id='sort'>
                         <option value='relevance'>Relevance</option>
@@ -146,5 +165,5 @@ class Resume extends React.Component {
 
 ReactDOM.render(
     <App />,
-    document.querySelector('#react')
+    document.querySelector('#container')
 )
