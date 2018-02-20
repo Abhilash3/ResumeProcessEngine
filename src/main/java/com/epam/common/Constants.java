@@ -2,9 +2,14 @@ package com.epam.common;
 
 public class Constants {
 
+    private Constants() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String ID = "id";
     public static final String PERIOD = ".";
     public static final String SPACE = " ";
+    public static final String BLANK = "";
     public static final String SORT = "sort";
     public static final String SKILLS = "skills";
     public static final String RELEVANCE = "relevance";
@@ -31,6 +36,7 @@ public class Constants {
         public static final String LAST_MODIFIED = "lastModified";
         public static final String GRADUATION = "graduation";
         public static final String WORDS = "words";
+        public static final String NOTES = "notes";
 
         public static final String COLLECTION = "resume";
     }

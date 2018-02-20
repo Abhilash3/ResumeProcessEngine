@@ -94,6 +94,7 @@ class ResumeParser {
 
         String id = NO_EMAIL.equals(email) ? filePath : email;
 
-        return new Resume(id, email, fileName, extension, filePath, lastModified, graduationYear, frequency);
+        return new Resume(id, email, fileName, extension, filePath, lastModified,
+                graduationYear, frequency, Constants.BLANK);
     }
 }

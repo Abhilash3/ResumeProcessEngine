@@ -14,9 +14,9 @@ class ResumeSearch extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {next: 0, resumes: []};
+        this.state = {resumes: []};
         this.onScroll = this.onScroll.bind(this);
-        this.onClick = this.onClick.bind(this);
+        this.onSearch = this.onSearch.bind(this);
     }
 
     componentWillMount() {
@@ -27,17 +27,13 @@ class ResumeSearch extends React.Component {
         window.removeEventListener('scroll', this.onScroll, false);
     }
 
-    onClick(e) {
+    onSearch(e) {
         e.preventDefault();
 
         var skills = document.querySelector('#skills').value.split(',')
             .map(a => a.trim()).filter(a => a.length > 0);
 
-        var experience = [
-            document.querySelector('#minExp').value || 0,
-            document.querySelector('#maxExp').value || 100,
-        ];
-
+        var experience = document.querySelector('#exp').value || 0;
         var sort = document.querySelector('#sort').value;
 
         this.retrieveResumes({skills, experience, sort}, 0, []);
@@ -50,13 +46,16 @@ class ResumeSearch extends React.Component {
             entity: data,
             path: `/resume/search?page=${page}`,
             headers: {'Content-Type': 'application/json'}
-        }).done(response => {
+        }).then(response => {
             this.setState({
                 next: page + 1, data, pending: false,
                 elementsReceived: response.entity.length !== 0,
                 resumes: [...resumes, ...response.entity]
             });
             this.onScroll();
+        }).catch(response => {
+            this.setState({pending: false});
+            console.log(response.entity);
         });
     }
 
@@ -70,32 +69,16 @@ class ResumeSearch extends React.Component {
         }
     }
 
-    onBlur(e) {
-        e.preventDefault();
-
-        var minExpInput = document.querySelector('#minExp');
-        var maxExpInput = document.querySelector('#maxExp');
-
-        var minValue = Number(minExpInput.value || 0);
-        var maxValue = Number(maxExpInput.value || 100);
-
-        if (minValue > maxValue) {
-            if (e.target === minExpInput) {
-                maxExpInput.value = minValue;
-            } else if (e.target === maxExpInput) {
-                minExpInput.value = maxValue;
-            }
-        }
-    }
-
     render() {
         return (
             <div>
                 <div className='input-group'>
-                    <input type='number' className='form-control' min='0' placeholder='Min...' id='minExp' onBlur={this.onBlur}></input>
-                    <input type='number' className='form-control' min='0' placeholder='Max...' id='maxExp' onBlur={this.onBlur}></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text'>years of experience in</span>
+                        <span className='input-group-text'>Total</span>
+                    </div>
+                    <input type='number' className='form-control' min='0' placeholder='Experience...' id='exp'></input>
+                    <div className='input-group-append'>
+                        <span className='input-group-text'>years of experience with skillSet</span>
                     </div>
                     <input type='text' className='form-control' placeholder='Skills...' id='skills'></input>
                     <div className='input-group-append'>
@@ -106,16 +89,25 @@ class ResumeSearch extends React.Component {
                         <option value='experience'>Experience</option>
                     </select>
                     <div className='input-group-append'>
-                        <button className='btn btn-outline-secondary' type='button' onClick={this.onClick}>Search...</button>
+                        <button className='btn btn-outline-secondary' type='button' onClick={this.onSearch}>Search...</button>
                     </div>
                 </div>
                 <ResumeList resumes={this.state.resumes}/>
+                <Popup />
             </div>
         );
     }
 }
 
 class ResumeList extends React.Component {
+    onClick(e) {
+        e.preventDefault();
+
+        if (e.target.classList.contains('open-file')) {
+            window.open(`/resume/open?id=${e.target.id}`);
+        }
+    }
+
     render() {
         var resumes = this.props.resumes.map((resume, index) =>
             <Resume key={resume.id} index={index} resume={resume}/>
@@ -129,9 +121,10 @@ class ResumeList extends React.Component {
                             <th>Resume</th>
                             <th>Email</th>
                             <th>Experience</th>
+                            <th>Notes</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody onClick={this.onClick}>
                         {resumes}
                     </tbody>
                 </table>
@@ -143,23 +136,116 @@ class ResumeList extends React.Component {
 class Resume extends React.Component {
     constructor(props) {
         super(props);
-        this.onClick = this.onClick.bind(this);
+        this.openPopup = this.openPopup.bind(this);
     }
 
-    onClick(e) {
+    openPopup(e) {
         e.preventDefault();
-        window.open(`/resume/open/${this.props.resume.fileName}`);
+        document.dispatchEvent(new CustomEvent('open-popup', { detail: this.props.resume }));
     }
 
     render() {
         return (
             <tr>
                 <td>{this.props.index + 1}</td>
-                <td><a href='#' className='card-link' onClick={this.onClick}>{this.props.resume.fileName}</a></td>
+                <td><a href='#' id={this.props.resume.id} className='card-link open-file'>{this.props.resume.fileName}</a></td>
                 <td>{this.props.resume.email}</td>
                 <td>{this.props.resume.experience}</td>
+                <td><button className='btn btn-light' type='button' onClick={this.openPopup}>Notes...</button></td>
             </tr>
         )
+    }
+}
+
+class Popup extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.save = this.save.bind(this);
+        this.cancel = this.cancel.bind(this);
+        this.openPopup = this.openPopup.bind(this);
+    }
+
+    componentDidMount() {
+        document.addEventListener('open-popup', this.openPopup);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('open-popup', this.openPopup);
+    }
+
+    openPopup(e) {
+        e.preventDefault();
+
+        document.querySelector('#backdrop').classList.toggle('hide');
+
+        this.resume = e.detail;
+        var popup = document.querySelector('#popup');
+
+        popup.classList.toggle('show');
+        popup.querySelector('#noteTitle').innerHTML = this.resume.fileName;
+        popup.querySelector('#noteArea').value = this.resume.notes;
+    }
+
+    save(e) {
+        e.preventDefault();
+
+        var notes = document.querySelector('#popup #noteArea').value;
+
+        client({
+            method: 'POST',
+            entity: notes,
+            path: `/resume/notes?id=${this.resume.id}`,
+            headers: {'Content-Type': 'text/plain'}
+        }).then(() => {
+            this.resume.notes = notes;
+            this.resume = null;
+        }).catch(response => {
+            console.log(response.entity);
+        });
+
+        this.closePopup();
+    }
+
+    cancel(e) {
+        e.preventDefault();
+        this.closePopup();
+    }
+
+    closePopup() {
+        document.querySelector('#backdrop').classList.toggle('hide');
+        var popup = document.querySelector('#popup');
+
+        popup.classList.toggle('show');
+        popup.querySelector('#noteTitle').innerHTML = '';
+        popup.querySelector('#noteArea').value = '';
+    }
+
+    render() {
+        return (
+            <div>
+                <div id='popup' className='modal'>
+                    <div className='modal-dialog modal-lg modal-dialog-centered'>
+                        <div className='modal-content'>
+                            <div className='modal-header'>
+                                <h5 className='modal-title' id='noteTitle'></h5>
+                                <button type='button' className='close' onClick={this.cancel}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className='modal-body'>
+                                <textarea id='noteArea' className='form-control'></textarea>
+                            </div>
+                            <div className='modal-footer'>
+                                <button type='button' className='btn btn-secondary' onClick={this.cancel}>Close</button>
+                                <button type='button' className='btn btn-primary' onClick={this.save}>Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id='backdrop' className='dropdown-backdrop hide'></div>
+            </div>
+        );
     }
 }
 

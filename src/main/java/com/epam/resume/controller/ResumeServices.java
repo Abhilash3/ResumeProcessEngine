@@ -1,6 +1,7 @@
 package com.epam.resume.controller;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import com.epam.query.ResumeQuery;
 import com.epam.resume.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,29 +16,30 @@ import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
+
+import static com.epam.common.Constants.Resume.*;
 
 @RestController
 @RequestMapping(value = "/resume")
 public class ResumeServices {
 
     private static final ProjectionOperation PROJECTING_RESUME_WITH_EXPERIENCE = Aggregation.project(
-            Constants.Resume.WORDS, Constants.Resume.EMAIL, Constants.Resume.FILE_PATH, Constants.Resume.LAST_MODIFIED,
-            Constants.Resume.GRADUATION, Constants.Resume.EXTENSION, Constants.Resume.FILE_NAME, Constants.Resume.ID
+            WORDS, EMAIL, FILE_PATH, LAST_MODIFIED, GRADUATION, EXTENSION, FILE_NAME, ID, NOTES
     ).and(ConditionalOperators.Cond
-            .when(Criteria.where(Constants.Resume.GRADUATION).is(0)).then(-1)
-            .otherwiseValueOf(ArithmeticOperators.Subtract
-                    .valueOf(Calendar.getInstance().get(Calendar.YEAR))
-                    .subtract(Constants.Resume.GRADUATION))).as(Constants.EXPERIENCE);
-    private static final Sort SORT_BY_ID = new Sort(Sort.Direction.ASC, Constants.Resume.ID);
+            .when(Criteria.where(GRADUATION).is(0)).then(-1)
+            .otherwiseValueOf(ArithmeticOperators.Subtract.valueOf(Utils.currentYear()).subtract(GRADUATION))
+    ).as(Constants.EXPERIENCE);
+
+    private static final Sort SORT_BY_ID = new Sort(Sort.Direction.ASC, ID);
 
     private static final long ELEMENTS_SIZE = 20L;
 
@@ -47,13 +49,9 @@ public class ResumeServices {
     @Autowired
     private MongoTemplate template;
 
-    @GetMapping(value = "/open/{fileName:.+}")
-    public ResponseEntity<InputStreamResource> retrieveResume(@PathVariable("fileName") String fileName) throws IOException {
-        Resume resume = template.findOne(new Query(Criteria.where(Constants.Resume.FILE_NAME).is(fileName)), Resume.class);
-        if (Objects.isNull(resume)) {
-            return ResponseEntity.badRequest().build();
-        }
-
+    @GetMapping(value = "/open")
+    public ResponseEntity<InputStreamResource> retrieveResume(@RequestParam("id") String id) throws IOException {
+        Resume resume = template.findOne(new Query(Criteria.where(ID).is(id)), Resume.class);
         FileSystemResource resource = new FileSystemResource(new File(basePath + resume.filePath()));
 
         return ResponseEntity.ok()
@@ -63,19 +61,17 @@ public class ResumeServices {
                 .body(new InputStreamResource(resource.getInputStream()));
     }
 
-    @PostMapping(value = "/search", consumes = "application/json")
+    @PostMapping(value = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<Resume> findByQuery(@RequestParam("page") int page, @RequestBody ResumeQuery query) {
 
         Criteria ct = new Criteria().orOperator(
                 Criteria.where(Constants.EXPERIENCE).is(-1),
-                new Criteria().andOperator(
-                        Criteria.where(Constants.EXPERIENCE).gte(query.experience()[0]),
-                        Criteria.where(Constants.EXPERIENCE).lte(query.experience()[1])));
+                Criteria.where(Constants.EXPERIENCE).gte(query.experience()));
 
         List<String> skills = query.skills();
         ArithmeticOperators.Add resumeRelevance = ArithmeticOperators.Add.valueOf(0);
         for (String skill : skills) {
-            String field = Constants.Resume.WORDS + Constants.PERIOD + skill;
+            String field = WORDS + Constants.PERIOD + skill;
             ct = ct.and(field).exists(true);
             resumeRelevance = resumeRelevance.add(field);
         }
@@ -89,6 +85,18 @@ public class ResumeServices {
                 Aggregation.skip(page * ELEMENTS_SIZE),
                 Aggregation.limit(ELEMENTS_SIZE));
 
-        return template.aggregate(pipeline, Constants.Resume.COLLECTION, Resume.class).getMappedResults();
+        return template.aggregate(pipeline, COLLECTION, Resume.class).getMappedResults();
+    }
+
+    @PostMapping(value = "/notes", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public void saveNotes(@RequestParam("id") String id, @RequestBody(required = false) String notes) {
+        if (Objects.isNull(notes)) notes = Constants.BLANK;
+        template.updateFirst(new Query(Criteria.where(ID).is(id)),
+                Update.update(NOTES, notes), COLLECTION);
+    }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class, NullPointerException.class})
+    public ResponseEntity<String> handleExceptions(Exception e) {
+        return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body(e.getMessage());
     }
 }

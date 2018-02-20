@@ -4,6 +4,7 @@ import com.epam.common.Constants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -20,9 +21,10 @@ public class Resume {
 
     private final Map<String, Long> words;
     private final int graduation;
+    private final String notes;
 
     public Resume(String id, String email, String fileName, String extension, String filePath, long lastModified,
-                  int graduation, Map<String, Long> words) {
+                  int graduation, Map<String, Long> words, String notes) {
         this.id = id;
         this.email = email;
         this.fileName = fileName;
@@ -30,7 +32,8 @@ public class Resume {
         this.filePath = filePath;
         this.lastModified = lastModified;
         this.graduation = graduation;
-        this.words = words;
+        this.words = Collections.unmodifiableMap(words);
+        this.notes = notes;
     }
 
     @Override
@@ -39,17 +42,19 @@ public class Resume {
         if (o == null || getClass() != o.getClass()) return false;
         Resume resume = (Resume) o;
         return graduation == resume.graduation &&
+                lastModified == resume.lastModified &&
                 Objects.equals(id, resume.id) &&
                 Objects.equals(email, resume.email) &&
                 Objects.equals(extension, resume.extension) &&
                 Objects.equals(fileName, resume.fileName) &&
                 Objects.equals(filePath, resume.filePath) &&
-                Objects.equals(words, resume.words);
+                Objects.equals(words, resume.words) &&
+                Objects.equals(notes, resume.notes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, extension, fileName, filePath, words, graduation);
+        return Objects.hash(id, email, extension, fileName, filePath, words, graduation, lastModified, notes);
     }
 
     public String id() {
@@ -84,7 +89,11 @@ public class Resume {
         return graduation;
     }
 
+    public String notes() {
+        return notes;
+    }
+
     public String fullName() {
-        return fileName + "." + extension;
+        return fileName + Constants.PERIOD + extension;
     }
 }

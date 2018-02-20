@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Order(3)
-public class LowerCase implements IRule {
+class LowerCase implements IRule {
     @Override
     public String apply(String s) {
         return s.toLowerCase();

@@ -1,6 +1,7 @@
 package com.epam.parsing;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import com.epam.file.FileTypes;
 import com.epam.resume.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 @Component
 public class ResumeLoader {
@@ -32,7 +32,7 @@ public class ResumeLoader {
     @Scheduled(cron = "${application.resume.loader.cron}")
     public void loadResumes() {
 
-        long startTime = Calendar.getInstance().getTimeInMillis();
+        long startTime = Utils.currentTimeInMillis();
 
         FileTypes.listFiles(resumeLocation, levelInside).stream()
                 .filter(file -> file.lastModified() >= lastRun)
