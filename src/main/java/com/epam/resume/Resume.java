@@ -57,6 +57,22 @@ public class Resume {
         return Objects.hash(id, email, extension, fileName, filePath, words, graduation, lastModified, notes);
     }
 
+    @Override
+    public String toString() {
+        return "Resume{id='" + id + "'}";
+    }
+
+    public String details() {
+        return "Resume{id='" + id +
+                "', email='" + email +
+                "', extension='" + extension +
+                "', fileName='" + fileName +
+                "', filePath='" + filePath +
+                "', lastModified=" + lastModified +
+                ", graduation=" + graduation +
+                ", notes='" + notes + "'}";
+    }
+
     public String id() {
         return id;
     }

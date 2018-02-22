@@ -6,7 +6,22 @@
     display: block !Important;
 }
 
-.dropdown-backdrop {
+#status {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 25%;
+}
+
+#status .inner-status {
+    padding: 5px;
+}
+
+#status .inner-status .alert {
+    margin: 0 auto;
+}
+
+.backdrop {
     position: fixed;
     top: 0;
     right: 0;
