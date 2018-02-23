@@ -1,7 +1,7 @@
-#Resume Process Engine
+# Resume Process Engine
 This is to Process Bulk resumes and presnt them in searchable format.
 
-####Instructions to start
+#### Instructions to start
 1. Download and install mongodb using link
 ```
 https://docs.mongodb.com/manual/installation/
@@ -20,7 +20,7 @@ https://git-scm.com/downloads
 ```
 5. Open another command prompt and run following steps one by one
 ```
-git clone https://git.epam.com/Atul_Bharti/ResumeProcessEngine/tree/version-0.1
+git clone https://git.epam.com/Atul_Bharti/ResumeProcessEngine
 cd ResumeProcessEngine
 maven package
 ```

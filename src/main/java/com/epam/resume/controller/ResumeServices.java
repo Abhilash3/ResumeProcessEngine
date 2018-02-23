@@ -4,7 +4,6 @@ import com.epam.common.Constants;
 import com.epam.common.Utils;
 import com.epam.resume.request.SearchRequest;
 import com.epam.resume.Resume;
-import com.epam.resume.request.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,17 +93,6 @@ public class ResumeServices {
                 Aggregation.limit(ELEMENTS_SIZE));
 
         return template.aggregate(pipeline, COLLECTION, Resume.class).getMappedResults();
-    }
-
-    @PostMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void updateResume(@RequestParam("id") String id, @RequestBody UpdateRequest updateRequest) {
-        logger.info("Request: resumeId=" + id + "; " + updateRequest);
-
-        template.updateFirst(new Query(Criteria.where(ID).is(id)),
-                Update.update(FILE_NAME, updateRequest.fileName())
-                        .set(GRADUATION, updateRequest.graduation())
-                        .set(EMAIL, updateRequest.email()),
-                COLLECTION);
     }
 
     @PostMapping(value = "/notes", consumes = MediaType.TEXT_PLAIN_VALUE)

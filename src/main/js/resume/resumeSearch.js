@@ -10,21 +10,14 @@ class ResumeSearch extends React.Component {
         this.details = {};
         this.onScroll = this.onScroll.bind(this);
         this.onSearch = this.onSearch.bind(this);
-        this.resumeUpdate = this.resumeUpdate.bind(this);
     }
 
     componentWillMount() {
         document.addEventListener('scroll', this.onScroll, false);
-        document.addEventListener('resume-update', this.resumeUpdate, false);
     }
 
     componentWillUnmount() {
         document.removeEventListener('scroll', this.onScroll, false);
-        document.removeEventListener('resume-update', this.resumeUpdate, false);
-    }
-
-    resumeUpdate() {
-        this.setState(this.state);
     }
 
     onSearch(e) {

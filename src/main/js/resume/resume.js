@@ -9,7 +9,6 @@ class Resume extends React.Component {
                 <td>{this.props.resume.email}</td>
                 <td>{this.props.resume.experience}</td>
                 <td><button data-id={this.props.resume.id} className='btn btn-light note-editor' type='button'>Notes...</button></td>
-                <td><button data-id={this.props.resume.id} className='btn btn-light resume-editor' type='button'>Edit</button></td>
             </tr>
         )
     }

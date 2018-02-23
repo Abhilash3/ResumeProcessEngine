@@ -1,7 +1,6 @@
 const React = require('react');
 const Resume = require('./resume');
 const NoteEditor = require('./editor/noteEditor');
-const ResumeEditor = require('./editor/resumeEditor');
 
 class ResumeList extends React.Component {
     constructor(props) {
@@ -20,11 +19,6 @@ class ResumeList extends React.Component {
             let resume = this.props.resumes.find(a => a.id === e.target.dataset.id);
             return document.dispatchEvent(new CustomEvent('note-editor', { detail: resume }));
         }
-
-        if (e.target.classList.contains('resume-editor')) {
-            let resume = this.props.resumes.find(a => a.id === e.target.dataset.id);
-            return document.dispatchEvent(new CustomEvent('resume-editor', { detail: resume }));
-        }
     }
 
     render() {
@@ -42,7 +36,6 @@ class ResumeList extends React.Component {
                                 <th>Email</th>
                                 <th>Experience</th>
                                 <th>Notes</th>
-                                <th>Edit</th>
                             </tr>
                         </thead>
                         <tbody onClick={this.onClick}>
@@ -51,7 +44,6 @@ class ResumeList extends React.Component {
                     </table>
                 </div>
                 <NoteEditor />
-                <ResumeEditor />
             </div>
         );
     }

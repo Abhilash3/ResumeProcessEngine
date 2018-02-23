@@ -2,7 +2,7 @@ const React = require('react');
 
 class Status extends React.Component {
     componentDidMount() {
-		setTimeout(this.props.close, 1500);
+		setTimeout(this.props.close, 5000);
     }
 
     render() {
