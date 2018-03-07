@@ -1,9 +1,9 @@
-package com.epam.parsing;
+package com.epam.resume.loader;
 
 import com.epam.common.Constants;
 import com.epam.common.Utils;
 import com.epam.file.FileTypes;
-import com.epam.resume.Resume;
+import com.epam.resume.vo.Resume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 @Component
-public class ResumeLoader implements CommandLineRunner {
+class ResumeLoader implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(ResumeLoader.class);
 
@@ -35,7 +33,7 @@ public class ResumeLoader implements CommandLineRunner {
     private long lastRun;
 
     @Scheduled(cron = "${application.resume.loader.cron}")
-    public void loadResumes() {
+    private void loadResumes() {
 
         logger.info("Loader started");
         long startTime = Utils.currentTimeInMillis();
@@ -43,7 +41,7 @@ public class ResumeLoader implements CommandLineRunner {
         FileTypes.listFiles(resumeLocation, levelInside).stream()
                 .filter(file -> file.lastModified() >= lastRun)
                 .forEach(file -> {
-                    logger.debug("Generating resume: " + file.getAbsolutePath());
+                    logger.debug("Processing: " + file.getAbsolutePath());
                     try {
                         Resume resume = parser.resumeFrom(file);
                         Resume existing = template.findById(resume.id(), Resume.class);
@@ -57,7 +55,7 @@ public class ResumeLoader implements CommandLineRunner {
                             logger.debug("Inserting: " + resume);
                             template.insert(resume, Constants.Resume.COLLECTION);
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
                 });

@@ -1,10 +1,17 @@
-package com.epam.resume;
+package com.epam.resume.vo;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,7 +39,7 @@ public class Resume {
         this.filePath = filePath;
         this.lastModified = lastModified;
         this.graduation = graduation;
-        this.words = Collections.unmodifiableMap(words);
+        this.words = words;
         this.notes = notes;
     }
 
@@ -71,6 +78,33 @@ public class Resume {
                 "', lastModified=" + lastModified +
                 ", graduation=" + graduation +
                 ", notes='" + notes + "'}";
+    }
+
+    @JsonComponent
+    private static class Serializer extends JsonSerializer<Resume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
+
+        private static final String NO_EXPERIENCE = "Experience not found";
+
+        @Override
+        public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            logger.debug("Serializing: " + resume);
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeStringField(Constants.ID, resume.id());
+            jsonGenerator.writeStringField(Constants.Resume.FILE_NAME, resume.fileName());
+            int graduationYear = resume.graduation();
+            jsonGenerator.writeNumberField(Constants.Resume.GRADUATION, graduationYear);
+            String experience = NO_EXPERIENCE;
+            if (graduationYear != 0) {
+                experience = String.valueOf(Utils.currentYear() - graduationYear);
+            }
+            jsonGenerator.writeStringField(Constants.EXPERIENCE, experience);
+            jsonGenerator.writeObjectField(Constants.Resume.EMAIL, resume.email());
+            jsonGenerator.writeObjectField(Constants.Resume.NOTES, resume.notes());
+            jsonGenerator.writeEndObject();
+        }
     }
 
     public String id() {

@@ -6,18 +6,27 @@
     display: block !Important;
 }
 
-#status {
+.grouping {
+    padding: 5px 0px;
+}
+
+.col-centered {
+    display: flex;
+    align-items: center;
+}
+
+#statusList {
     position: fixed;
     bottom: 0;
     right: 0;
     width: 25%;
 }
 
-#status .inner-status {
+#statusList .status {
     padding: 5px;
 }
 
-#status .inner-status .alert {
+#statusList .status .alert {
     margin: 0 auto;
 }
 
@@ -29,4 +38,8 @@
     left: 0;
     background-color: rgba(0,0,0,0.7);
     z-index: 990;
+}
+
+.btn:focus {
+    box-shadow: none !Important;
 }

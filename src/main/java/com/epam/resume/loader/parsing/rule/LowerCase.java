@@ -1,4 +1,4 @@
-package com.epam.parsing.rule;
+package com.epam.resume.loader.parsing.rule;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;

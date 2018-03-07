@@ -1,0 +1,7 @@
+js,javascript,es,ecmascript
+c++,cpp
+c#,csharp
+j2ee,jee
+angular,angularjs
+r,s
+linux,ubuntu,debian

@@ -1,8 +1,10 @@
-package com.epam.parsing;
+package com.epam.resume.loader;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import com.epam.file.FileTypes;
-import com.epam.resume.Resume;
+import com.epam.resume.loader.parsing.Rules;
+import com.epam.resume.vo.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,10 +25,10 @@ class ResumeParser {
     private String basePath;
 
     @Autowired
-    private RuleExecutor executor;
+    private Rules rules;
 
     private Map<String, Long> wordFrequency(String string) {
-        return Arrays.stream(string.split(Constants.SPACE))
+        return Arrays.stream(rules.applyRules(string).split(Constants.SPACE))
                 .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 
@@ -46,7 +48,7 @@ class ResumeParser {
         while (matcher.find()) {
             numbers.add(Integer.valueOf(matcher.group()));
         }
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        int currentYear = Utils.currentYear();
         List<Integer> years = numbers.stream()
                 .filter(a -> a <= currentYear && a >= currentYear - 30)
                 .collect(Collectors.toList());
@@ -62,7 +64,7 @@ class ResumeParser {
         years.sort(Comparator.comparingInt(a -> a));
 
         int start = 0;
-        if (checkForDOB(years)) {
+        if (years.get(1) - years.get(0) >= 12) {
             start = 1;
         }
         int possibleGraduationYear = years.get(start);
@@ -76,10 +78,6 @@ class ResumeParser {
         return possibleGraduationYear;
     }
 
-    private boolean checkForDOB(List<Integer> years) {
-        return years.get(1) - years.get(0) >= 12;
-    }
-
     Resume resumeFrom(File file) throws IOException {
         String fileFullName = file.getName();
         String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.')).trim();
@@ -88,7 +86,7 @@ class ResumeParser {
         String filePath = file.getAbsolutePath().replaceAll("[\\\\]", "/").split(basePath)[1];
         long lastModified = file.lastModified();
 
-        Map<String, Long> frequency = wordFrequency(executor.applyRules(fileContent));
+        Map<String, Long> frequency = wordFrequency(fileContent);
         String email = emailId(fileContent);
         int graduationYear = graduationYear(fileContent);
 

@@ -1,6 +1,6 @@
 const React = require('react');
-const Editor = require('./editor');
-const client = require('./../../client');
+const Editor = require('../../modal/editor');
+const client = require('./../../api/client');
 
 class NoteEditor extends Editor {
     constructor(props) {
@@ -9,34 +9,33 @@ class NoteEditor extends Editor {
 
     update({fileName = '', notes = ''} = {}) {
         this.dom.querySelector('#title').innerHTML = fileName;
-        this.dom.querySelector('#area').value = notes;
-        this.dom.querySelector('#area').focus();
+        this.dom.querySelector('#notes').value = notes;
+        this.dom.querySelector('#notes').focus();
     }
 
     save(e) {
         e.preventDefault();
-        var notes = this.dom.querySelector('#area').value;
+        var resume = this.details;
+        var notes = this.dom.querySelector('#notes').value;
 
         client({
             method: 'POST',
-            entity: notes,
-            path: `/resume/notes?id=${this.resume.id}`,
-            headers: {'Content-Type': 'text/plain'}
+            entity: {id: resume.id, field: 'notes', content: notes},
+            path: '/resume/update',
+            headers: {'Content-Type': 'application/json'}
         }).then(() => {
-            this.resume.notes = notes;
-            this.resume = null;
-
-            document.dispatchEvent(new CustomEvent('display-status', {detail: {type: 'info', text: 'Notes saved'}}));
-            this.close();
-        }).catch(response => {
+            resume.notes = notes;
+            document.dispatchEvent(new CustomEvent('display-status', {detail: {text: 'Notes saved'}}));
+        }, response => {
             console.log(response);
-            document.dispatchEvent(new CustomEvent('display-status', {detail: {type: 'danger', text: 'Save failed'}}));
+            document.dispatchEvent(new CustomEvent('display-status', {detail: {imp: true, type: 'danger', text: 'Save failed'}}));
         });
+        this.close();
     }
 
     render() {
         return (
-            <div id='noteEditor' className='modal backdrop'>
+            <div id='noteEditor' className='modal fade backdrop'>
                 <div className='modal-dialog modal-lg modal-dialog-centered'>
                     <div className='modal-content'>
                         <div className='modal-header'>
@@ -46,11 +45,11 @@ class NoteEditor extends Editor {
                             </button>
                         </div>
                         <div className='modal-body'>
-                            <textarea id='area' className='form-control'></textarea>
+                            <textarea id='notes' className='form-control'></textarea>
                         </div>
                         <div className='modal-footer'>
-                            <button type='button' className='btn btn-secondary' onClick={this.cancel}>Close</button>
-                            <button type='button' className='btn btn-primary' onClick={this.save}>Save</button>
+                            <button type='button' className='btn btn-light' onClick={this.cancel}>Cancel</button>
+                            <button type='button' className='btn btn-dark' onClick={this.save}>Save</button>
                         </div>
                     </div>
                 </div>

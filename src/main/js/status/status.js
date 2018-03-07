@@ -1,16 +1,23 @@
 const React = require('react');
 
 class Status extends React.Component {
+    constructor(props) {
+        super(props);
+        this.item = this.props.item;
+    }
+
     componentDidMount() {
-		setTimeout(this.props.close, 5000);
+        if (!this.item.imp) {
+		    setTimeout(this.props.close, this.item.timeout || 5000);
+		}
     }
 
     render() {
 	    return (
-			<div>
-				<div className={`alert alert-${this.props.type} alert-dismissable`}>
+			<div className='status'>
+				<div className={`alert alert-${this.item.type || 'secondary'}`}>
 					<a href='#' className='close' onClick={this.props.close}>&times;</a>
-					{this.props.text}
+					{this.item.text}
 				</div>
 			</div>
 		);

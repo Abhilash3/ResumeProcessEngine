@@ -1,6 +1,6 @@
 const React = require('react');
 const Resume = require('./resume');
-const NoteEditor = require('./editor/noteEditor');
+const NoteEditor = require('./note/noteEditor');
 
 class ResumeList extends React.Component {
     constructor(props) {

@@ -1,6 +1,6 @@
 const React = require('react');
 const ResumeList = require('./resumeList');
-const client = require('./../client');
+const client = require('./../api/client');
 
 class ResumeSearch extends React.Component {
 
@@ -22,35 +22,33 @@ class ResumeSearch extends React.Component {
 
     onSearch(e) {
         e.preventDefault();
+        this.setState({resumes: []});
 
-        var skills = document.querySelector('#skills').value.split(',')
-            .map(a => a.trim()).filter(a => a.length > 0);
+        var keywords = document.querySelector('#keywords').value.split(',')
+            .map(a => a.trim()).filter(a => a.length);
 
         var experience = document.querySelector('#exp').value || 0;
         var sort = document.querySelector('#sort').value;
 
-        this.retrieveResumes({skills, experience, sort});
+        this.retrieveResumes({keywords, experience, sort, page: 0});
     }
 
-    retrieveResumes(data, page = 0, resumes = []) {
+    retrieveResumes(query, resumes = []) {
         this.details.pending = true;
         client({
             method: 'POST',
-            entity: data,
-            path: `/resume/search?page=${page}`,
+            entity: query,
+            path: '/resume/search',
             headers: {'Content-Type': 'application/json'}
         }).then(response => {
             this.setState({resumes: [...resumes, ...response.entity]});
-            this.details = {
-                next: page + 1, data, pending: false,
-                count: response.entity.length
-            };
-
+            query.page = query.page + 1;
+            this.details = {query, pending: false, count: response.entity.length};
             document.dispatchEvent(new Event('scroll'));
-        }).catch(response => {
+        }, response => {
             this.details.pending = false;
             console.log(response);
-            document.dispatchEvent(new CustomEvent('display-status', {detail: {type: 'danger', text: 'Search failed'}}));
+            document.dispatchEvent(new CustomEvent('display-status', {detail: {imp: true, type: 'danger', text: 'Search failed'}}));
         });
     }
 
@@ -60,7 +58,7 @@ class ResumeSearch extends React.Component {
         var clientHeight = document.documentElement.clientHeight || window.innerHeight;
 
         if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && this.details.count && !this.details.pending) {
-            this.retrieveResumes(this.details.data, this.details.next, this.state.resumes);
+            this.retrieveResumes(this.details.query, this.state.resumes);
         }
     }
 
@@ -73,9 +71,9 @@ class ResumeSearch extends React.Component {
                     </div>
                     <input type='number' className='form-control' min='0' placeholder='Experience...' id='exp'></input>
                     <div className='input-group-append'>
-                        <span className='input-group-text'>years of experience with skillSet</span>
+                        <span className='input-group-text'>years of experience with keywords</span>
                     </div>
-                    <input type='text' className='form-control' placeholder='Skills...' id='skills'></input>
+                    <input type='text' className='form-control' placeholder='Keywords...' id='keywords'></input>
                     <div className='input-group-append'>
                         <span className='input-group-text'>sorted by</span>
                     </div>

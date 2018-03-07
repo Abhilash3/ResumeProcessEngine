@@ -24,7 +24,6 @@ public class FileTypes {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("ConstantConditions")
     public static FileType parse(String extension) {
         return FileType.valueOf(extension.toLowerCase());
     }
@@ -44,7 +43,7 @@ public class FileTypes {
                 file.isFile() && extensions.stream().anyMatch(extension -> file.getName().endsWith(extension)))
         ).collect(Collectors.toList());
 
-        logger.debug("Identified " + files.size() + "file(s) from " + dir.getAbsolutePath());
+        logger.debug("Identified " + files.size() + " file(s) from " + dir.getAbsolutePath());
 
         if (level != 0) {
             Stream.of(dir.listFiles(File::isDirectory))

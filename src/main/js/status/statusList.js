@@ -27,11 +27,9 @@ class StatusList extends React.Component {
 
     render() {
         var list = this.state.list.map((item, index) =>
-            <Status key={index} type={item.type} text={item.text} close={() => this.removeStatus(item)} />
+            <Status key={index} item={item} close={() => this.removeStatus(item)} />
         );
-        return (
-            <div id='status'>{list}</div>
-        );
+        return (<div id='statusList'>{list}</div>);
     }
 }
 

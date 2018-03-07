@@ -10,9 +10,6 @@ public class Constants {
     public static final String PERIOD = ".";
     public static final String SPACE = " ";
     public static final String BLANK = "";
-    public static final String SORT = "sort";
-    public static final String SKILLS = "skills";
-    public static final String RELEVANCE = "relevance";
     public static final String EXPERIENCE = "experience";
 
     public static class FileTypes {
@@ -22,9 +19,15 @@ public class Constants {
 
     public static class Patterns {
         public static final String EMAIL = "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+";
-        public static final String ALL_EXCEPT_ALPHANUMERIC = "[^a-zA-Z0-9 ]";
+        public static final String ALL_EXCEPT_ALPHANUMERIC = "[^a-zA-Z0-9+@# ]";
         public static final String WHITESPACES = "[\\s]+";
         public static final String YEARS = "\\b\\d{4}\\b";
+    }
+
+    public static class Grouping {
+        public static final String KEYWORDS = "keywords";
+
+        public static final String COLLECTION = "group";
     }
 
     public static class Resume {
