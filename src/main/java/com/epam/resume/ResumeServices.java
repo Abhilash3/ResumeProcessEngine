@@ -2,7 +2,7 @@ package com.epam.resume;
 
 import com.epam.common.Constants;
 import com.epam.common.Utils;
-import com.epam.group.vo.Grouping;
+import com.epam.grouping.vo.Grouping;
 import com.epam.resume.request.SearchResume;
 import com.epam.resume.request.UpdateResume;
 import com.epam.resume.vo.Resume;

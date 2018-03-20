@@ -18,6 +18,10 @@ class GroupingList extends React.Component {
         this.refresh();
     }
 
+    componentWillUnMount() {
+        this.dom.removeEventListener('keyup', this.onKeyup);
+    }
+
     onKeyup(e) {
         e.preventDefault();
         if (!e.target.classList.contains('grouping-text')) {
@@ -74,14 +78,14 @@ class GroupingList extends React.Component {
         });
     }
 
-    saveGrouping(keywords, callback) {
+    saveGrouping(index, keywords, callback) {
         client({
             method: 'POST',
             entity: {keywords},
             path: '/grouping/save',
             headers: {'Content-Type': 'application/json'}
         }).then(response => {
-            this.state.groupings[this.state.groupings.length - 1].keywords = keywords;
+            this.state.groupings[index].keywords = keywords;
             this.update(this.state.groupings, callback);
         }, response => {
             console.log(response);
@@ -129,19 +133,13 @@ class GroupingList extends React.Component {
         };
 
         var reset = () => {
-            toggleState();
             input.value = oldKeywords.join(', ');
+            toggleState();
         };
 
-        var saveNew = () => {
-            toggleState();
-            this.saveGrouping(newKeywords);
-        };
+        var saveNew = () => this.saveGrouping(index, newKeywords, toggleState);
 
-        var update = () => {
-            toggleState();
-            this.updateGrouping(index, newKeywords);
-        };
+        var update = () => this.updateGrouping(index, newKeywords, toggleState);
 
         var resetPostDeleteWith = inputValues => {
             return () => this.state.groupings.forEach((a, b) => {

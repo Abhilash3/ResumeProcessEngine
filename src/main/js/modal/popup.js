@@ -13,24 +13,24 @@ class Popup extends React.Component {
     componentDidMount() {
         this.dom = document.querySelector(this.selector);
         document.addEventListener(this.event, this.open, false);
-        document.addEventListener('keyup', this.keyup, false);
+        this.dom.addEventListener('keyup', this.keyup, false);
     }
 
     componentWillUnmount() {
         document.removeEventListener(this.event, this.open, false);
-        document.removeEventListener('keyup', this.keyup, false);
+        this.dom.removeEventListener('keyup', this.keyup, false);
     }
 
     open(e) {
         e.preventDefault();
         this.details = e.detail;
-        this.dom.classList.add('show');
+        this.dom.classList.toggle('show');
         this.update(this.details);
     }
 
     close() {
         this.details = null;
-        this.dom.classList.remove('show');
+        this.dom.classList.toggle('show');
         this.update();
     }
 

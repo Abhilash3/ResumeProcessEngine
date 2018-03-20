@@ -1,4 +1,4 @@
-package com.epam.group.request;
+package com.epam.grouping.request;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;

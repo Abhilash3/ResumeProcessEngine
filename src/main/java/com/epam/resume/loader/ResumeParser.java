@@ -28,7 +28,7 @@ class ResumeParser {
     private Rules rules;
 
     private Map<String, Long> wordFrequency(String string) {
-        return Arrays.stream(rules.applyRules(string).split(Constants.SPACE))
+        return Arrays.stream(rules.applyRules(string).split(Constants.SPACE)).filter(a -> a.length() > 0)
                 .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 

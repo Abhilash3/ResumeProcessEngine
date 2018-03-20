@@ -1,7 +1,7 @@
-package com.epam.group;
+package com.epam.grouping;
 
-import com.epam.group.request.UpdateGrouping;
-import com.epam.group.vo.Grouping;
+import com.epam.grouping.request.UpdateGrouping;
+import com.epam.grouping.vo.Grouping;
 import com.mongodb.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

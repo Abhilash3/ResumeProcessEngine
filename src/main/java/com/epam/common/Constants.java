@@ -27,7 +27,7 @@ public class Constants {
     public static class Grouping {
         public static final String KEYWORDS = "keywords";
 
-        public static final String COLLECTION = "group";
+        public static final String COLLECTION = "grouping";
     }
 
     public static class Resume {

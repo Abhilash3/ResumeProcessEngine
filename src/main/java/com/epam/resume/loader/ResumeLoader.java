@@ -52,6 +52,8 @@ class ResumeLoader implements CommandLineRunner {
                         } else if (resume.lastModified() > existing.lastModified()) {
                             logger.debug("Removing older version: " + existing.details());
                             template.remove(existing, Constants.Resume.COLLECTION);
+
+                            resume = merged(resume, existing);
                             logger.debug("Inserting: " + resume);
                             template.insert(resume, Constants.Resume.COLLECTION);
                         }
@@ -62,6 +64,12 @@ class ResumeLoader implements CommandLineRunner {
 
         logger.info("Loader finished in " + (Utils.currentTimeInMillis() - startTime) + " millis");
         lastRun = startTime;
+    }
+
+    private Resume merged(Resume newVersion, Resume oldVersion) {
+        return new Resume(newVersion.id(), newVersion.email(), newVersion.fileName(), newVersion.extension(),
+                newVersion.filePath(), newVersion.lastModified(), newVersion.graduation(), newVersion.words(),
+                oldVersion.notes());
     }
 
     @Override

@@ -4,9 +4,11 @@ import com.epam.common.Constants;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.function.Function;
+
 @Component
 @Order(1)
-class KeepOnlyAlphanumeric implements IRule {
+class KeepOnlyAlphanumeric implements Function<String, String> {
     @Override
     public String apply(String s) {
         // TODO: need to be able to search for .net skill

@@ -1,4 +1,4 @@
-package com.epam.group.vo;
+package com.epam.grouping.vo;
 
 import com.epam.common.Constants;
 import com.fasterxml.jackson.core.JsonGenerator;
