@@ -49,7 +49,7 @@ public class Grouping {
 
         @Override
         public void serialize(Grouping grouping, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            logger.debug("Serializing: " + grouping);
+            logger.debug("Serializing: {}", grouping);
             jsonGenerator.writeObject(grouping.keywords());
         }
     }
@@ -63,7 +63,7 @@ public class Grouping {
         public Grouping deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-            logger.debug("Deserializing: " + node);
+            logger.debug("Deserializing: {}", node);
 
             Iterable<JsonNode> iterable = () -> node.get(Constants.Grouping.KEYWORDS).elements();
             List<String> keywords = StreamSupport.stream(iterable.spliterator(), false)

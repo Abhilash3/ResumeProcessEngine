@@ -9,7 +9,7 @@ class GroupingList extends React.Component {
         this.onKeyup = this.onKeyup.bind(this);
         this.onClick = this.onClick.bind(this);
         this.refresh = this.refresh.bind(this);
-        this.newGrouping = this.newGrouping.bind(this);
+        this.addGrouping = this.addGrouping.bind(this);
     }
 
     componentDidMount() {
@@ -50,7 +50,7 @@ class GroupingList extends React.Component {
         });
     }
 
-    newGrouping(e) {
+    addGrouping(e) {
         e.preventDefault();
 
         var groupings = this.dom.querySelectorAll('input.grouping-text');
@@ -96,8 +96,7 @@ class GroupingList extends React.Component {
     updateGrouping(index, newKeywords, callback) {
         var oldKeywords = this.state.groupings[index].keywords;
         if (oldKeywords.slice().sort().join() === newKeywords.slice().sort().join()) {
-            document.dispatchEvent(new CustomEvent('display-status', {detail: {text: 'No change detected'}}));
-            return;
+            return document.dispatchEvent(new CustomEvent('display-status', {detail: {text: 'No change detected'}}));
         }
 
         client({
@@ -121,8 +120,7 @@ class GroupingList extends React.Component {
         }
 
         var index = +e.target.dataset.index;
-        var dom = this.dom.querySelector(`#grouping-${index}`);
-        var input = dom.querySelector('input.grouping-text');
+        var input = this.dom.querySelector(`#grouping-${index} input.grouping-text`);
 
         var oldKeywords = this.state.groupings[index].keywords;
         var newKeywords = input.value.split(',').map(a => a.trim().toLowerCase()).filter(a => a.length);
@@ -141,30 +139,24 @@ class GroupingList extends React.Component {
 
         var update = () => this.updateGrouping(index, newKeywords, toggleState);
 
-        var resetPostDeleteWith = inputValues => {
+        var resetPostDeleteWith = values => {
             return () => this.state.groupings.forEach((a, b) => {
-                this.dom.querySelector(`#grouping-${b} input.grouping-text`).value = inputValues[b];
+                this.dom.querySelector(`#grouping-${b} input.grouping-text`).value = values[b];
             });
         };
 
         var remove = () => {
             var inputs = this.dom.querySelectorAll(`.grouping:not(:nth-child(${index + 1})) input.grouping-text`);
             var inputValues = Array.prototype.map.call(inputs, a => a.value);
-
             this.deleteGrouping(index, resetPostDeleteWith(inputValues));
         };
 
-        var confirmRemove = () => {
-            if (confirm('Empty grouping will be deleted, are you sure?')) {
-                remove();
-            }
-        };
+        var openConfirm = (ques, callback) => document.dispatchEvent(new CustomEvent('confirm', {detail: {ques, callback}}));
 
-        var confirmEmpty = () => {
-            if (confirm('Empty grouping will be ignored, are you sure?')) {
-                this.update(this.state.groupings.filter((a, b) => b !== index));
-            }
-        };
+        var confirmRemove = () => openConfirm('Empty grouping will be deleted.', remove);
+
+        var ignoreEmpty = () => this.update(this.state.groupings.filter((a, b) => b !== index));
+        var confirmEmpty = () => openConfirm('Empty grouping will be ignored.', ignoreEmpty);
 
         var edit = () => toggleState(() => input.focus());
 
@@ -178,7 +170,7 @@ class GroupingList extends React.Component {
         operations[e.target.dataset.intent]();
     }
 
-    update(groupings = [], callBack) {
+    update(groupings = [], callBack = null) {
         this.setState({groupings}, callBack);
     }
 
@@ -197,7 +189,7 @@ class GroupingList extends React.Component {
                     </div>
                 </div>
                 <div className='btn-group float-right'>
-                    <button className='btn btn-secondary' onClick={this.newGrouping}>New Grouping</button>
+                    <button className='btn btn-secondary' onClick={this.addGrouping}>New Grouping</button>
                     <button className='btn btn-secondary' onClick={this.refresh}>Refresh</button>
                 </div>
             </div>

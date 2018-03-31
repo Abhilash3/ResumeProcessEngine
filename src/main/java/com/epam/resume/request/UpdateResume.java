@@ -58,7 +58,7 @@ public class UpdateResume {
         public UpdateResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-            logger.debug("Deserializing: " + node);
+            logger.debug("Deserializing: {}", node);
 
             String id = node.get(Constants.ID).asText();
             String field = node.get(FIELD).asText();

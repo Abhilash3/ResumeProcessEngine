@@ -1,5 +1,6 @@
 package com.epam.grouping.request;
 
+import com.epam.common.Utils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -9,13 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.jackson.JsonComponent;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class UpdateGrouping {
 
-    private final List<String> oldKeywords, newKeywords;
+    private final List<String> oldKeywords;
+    private final List<String> newKeywords;
 
     UpdateGrouping(List<String> oldKeywords, List<String> newKeywords) {
         this.oldKeywords = oldKeywords;
@@ -54,13 +55,10 @@ public class UpdateGrouping {
         public UpdateGrouping deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-            logger.debug("Deserializing: " + node);
+            logger.debug("Deserializing: {}", node);
 
-            List<String> oldKeywords = new ArrayList<>();
-            node.get(OLD_VERSION).elements().forEachRemaining(jsonNode -> oldKeywords.add(jsonNode.asText().toLowerCase()));
-
-            List<String> newKeywords = new ArrayList<>();
-            node.get(NEW_VERSION).elements().forEachRemaining(jsonNode -> newKeywords.add(jsonNode.asText().toLowerCase()));
+            List<String> oldKeywords = Utils.collect(node.get(OLD_VERSION).elements(), a -> a.asText().toLowerCase());
+            List<String> newKeywords = Utils.collect(node.get(NEW_VERSION).elements(), a -> a.asText().toLowerCase());
 
             return new UpdateGrouping(oldKeywords, newKeywords);
         }

@@ -89,7 +89,7 @@ public class Resume {
 
         @Override
         public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            logger.debug("Serializing: " + resume);
+            logger.debug("Serializing: {}", resume);
 
             jsonGenerator.writeStartObject();
             jsonGenerator.writeStringField(Constants.ID, resume.id());

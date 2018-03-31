@@ -41,35 +41,33 @@ class ResumeLoader implements CommandLineRunner {
         FileTypes.listFiles(resumeLocation, levelInside).stream()
                 .filter(file -> file.lastModified() >= lastRun)
                 .forEach(file -> {
-                    logger.debug("Processing: " + file.getAbsolutePath());
+                    logger.debug("Processing: {}", file.getAbsolutePath());
                     try {
                         Resume resume = parser.resumeFrom(file);
                         Resume existing = template.findById(resume.id(), Resume.class);
 
-                        if (existing == null) {
-                            logger.debug("Inserting: " + resume);
-                            template.insert(resume, Constants.Resume.COLLECTION);
-                        } else if (resume.lastModified() > existing.lastModified()) {
-                            logger.debug("Removing older version: " + existing.details());
+                        if (existing != null && resume.lastModified() <= existing.lastModified()) {
+                            return;
+                        } else if (existing != null) {
+                            logger.debug("Removing older version: {}", existing.details());
                             template.remove(existing, Constants.Resume.COLLECTION);
-
                             resume = merged(resume, existing);
-                            logger.debug("Inserting: " + resume);
-                            template.insert(resume, Constants.Resume.COLLECTION);
                         }
+
+                        logger.debug("Inserting: {}", resume);
+                        template.insert(resume, Constants.Resume.COLLECTION);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
                 });
 
-        logger.info("Loader finished in " + (Utils.currentTimeInMillis() - startTime) + " millis");
+        logger.info("Loader finished in {} millis", Utils.currentTimeInMillis() - startTime);
         lastRun = startTime;
     }
 
-    private Resume merged(Resume newVersion, Resume oldVersion) {
-        return new Resume(newVersion.id(), newVersion.email(), newVersion.fileName(), newVersion.extension(),
-                newVersion.filePath(), newVersion.lastModified(), newVersion.graduation(), newVersion.words(),
-                oldVersion.notes());
+    private Resume merged(Resume newer, Resume older) {
+        return new Resume(newer.id(), newer.email(), newer.fileName(), newer.extension(), newer.filePath(),
+                newer.lastModified(), newer.graduation(), newer.words(), older.notes());
     }
 
     @Override

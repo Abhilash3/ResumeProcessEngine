@@ -59,7 +59,7 @@ public class ResumeServices {
 
     @GetMapping(value = "/open")
     public ResponseEntity<InputStreamResource> openResume(@RequestParam("id") String id) throws IOException {
-        logger.info("OpenResume{id='" + id + "'}");
+        logger.info("OpenResume{id='{}'}", id);
 
         Resume resume = template.findOne(new Query(Criteria.where(ID).is(id)), Resume.class, COLLECTION);
         FileSystemResource resource = new FileSystemResource(new File(basePath + resume.filePath()));
@@ -73,7 +73,7 @@ public class ResumeServices {
 
     @PostMapping(value = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<Resume> searchResume(@RequestBody SearchResume searchResume) {
-        logger.info(searchResume.toString());
+        logger.info("{}", searchResume);
 
         Criteria ct = new Criteria().orOperator(
                 Criteria.where(Constants.EXPERIENCE).is(-1),
@@ -111,12 +111,12 @@ public class ResumeServices {
 
     @PostMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateResume(@RequestBody UpdateResume updateResume) {
-        logger.info(updateResume.toString());
+        logger.info("{}", updateResume);
 
         WriteResult result = template.updateFirst(new Query(Criteria.where(ID).is(updateResume.id())),
                 Update.update(updateResume.field(), updateResume.content()), COLLECTION);
 
-        logger.debug(result.toString());
+        logger.debug("{}", result);
     }
 
     @ExceptionHandler(value = Exception.class)

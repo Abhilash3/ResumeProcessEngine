@@ -11,10 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class FileTypes {
 
@@ -24,12 +24,16 @@ public class FileTypes {
         throw new UnsupportedOperationException();
     }
 
-    public static FileType parse(String extension) {
-        return FileType.valueOf(extension.toLowerCase());
+    public static FileType parser(String extension) {
+        return FileType.valueOf(extension.toUpperCase());
     }
 
     public static List<File> listFiles(String location, int levelInside) {
-        return listFiles(new File(location), levelInside);
+        List<File> files = listFiles(new File(location), levelInside);
+
+        logger.debug("Identified {} file(s) from {}", files.size(), location);
+
+        return files;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -37,29 +41,28 @@ public class FileTypes {
         if (dir == null || !dir.isDirectory()) {
             return Collections.emptyList();
         }
-        List<String> extensions = Stream.of(FileType.values()).map(FileType::extension).collect(Collectors.toList());
+        List<String> extensions = Arrays.stream(FileType.values())
+                .map(FileType::extension).collect(Collectors.toList());
 
-        List<File> files = Stream.of(dir.listFiles(file ->
+        List<File> files = Arrays.stream(dir.listFiles(file ->
                 file.isFile() && extensions.stream().anyMatch(extension -> file.getName().endsWith(extension)))
         ).collect(Collectors.toList());
 
-        logger.debug("Identified " + files.size() + " file(s) from " + dir.getAbsolutePath());
-
         if (level != 0) {
-            Stream.of(dir.listFiles(File::isDirectory))
+            Arrays.stream(dir.listFiles(File::isDirectory))
                     .forEach(innerDir -> files.addAll(listFiles(innerDir, level - 1)));
         }
         return files;
     }
 
     public enum FileType {
-        pdf(Constants.FileTypes.PDF, file -> {
+        PDF(Constants.FileTypes.PDF, file -> {
             PDDocument doc = PDDocument.load(file);
             String content = new PDFTextStripper().getText(doc);
             doc.close();
             return content;
         }),
-        doc(Constants.FileTypes.DOC, file -> {
+        DOC(Constants.FileTypes.DOC, file -> {
             InputStream doc = new FileInputStream(file);
             String content = new HWPFDocument(doc).getText().toString();
             doc.close();

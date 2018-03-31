@@ -9,14 +9,14 @@ import java.util.function.Function;
 @Component
 public class Rules {
 
-    private final Function<String, String> rules;
+    private final Function<String, String> ops;
 
     @Autowired
     public Rules(List<Function<String, String>> rules) {
-        this.rules = rules.stream().reduce(Function.identity(), Function::andThen);
+        this.ops = rules.stream().reduce(Function.identity(), Function::andThen);
     }
 
     public String applyRules(String content) {
-        return rules.apply(content);
+        return ops.apply(content);
     }
 }

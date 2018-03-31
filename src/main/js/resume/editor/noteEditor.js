@@ -25,7 +25,6 @@ class NoteEditor extends Editor {
             headers: {'Content-Type': 'application/json'}
         }).then(() => {
             resume.notes = notes;
-            document.dispatchEvent(new CustomEvent('display-status', {detail: {text: 'Notes saved'}}));
         }, response => {
             console.log(response);
             document.dispatchEvent(new CustomEvent('display-status', {detail: {imp: true, type: 'danger', text: 'Save failed'}}));

@@ -7,6 +7,17 @@ class Editor extends Popup {
 
         this.save = this.save.bind(this);
         this.cancel = this.cancel.bind(this);
+        this.keyup = this.keyup.bind(this);
+    }
+
+    componentDidMount() {
+        super.componentDidMount();
+        this.dom.addEventListener('keyup', this.keyup, false);
+    }
+
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        this.dom.removeEventListener('keyup', this.keyup, false);
     }
 
     cancel(e) {
@@ -16,6 +27,13 @@ class Editor extends Popup {
 
     save() {
         throw new Error('Not Supported');
+    }
+
+    keyup(e) {
+        e.preventDefault();
+        if (e.keyCode === 27) {
+            this.close();
+        }
     }
 }
 

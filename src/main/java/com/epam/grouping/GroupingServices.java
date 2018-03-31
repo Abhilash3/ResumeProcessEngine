@@ -38,47 +38,43 @@ class GroupingServices {
 
     @PostMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateGrouping(@RequestBody UpdateGrouping updateGrouping) {
-        logger.info(updateGrouping.toString());
+        logger.info("{}", updateGrouping);
 
         WriteResult result = template.updateFirst(
                 Query.query(keywordCriteria(updateGrouping.oldKeywords())),
                 Update.update(KEYWORDS, updateGrouping.newKeywords()), Grouping.class, COLLECTION);
 
-        logger.debug(result.toString());
+        logger.debug("{}", result);
     }
 
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void saveGrouping(@RequestBody Grouping grouping) {
-        if (grouping.keywords().size() == 0) {
+        if (grouping.keywords().isEmpty()) {
             logger.info(EMPTY_GROUPING_MSG);
             return;
         }
 
-        logger.info("Save" + grouping);
+        logger.info("Save{}", grouping);
         template.insert(grouping, COLLECTION);
     }
 
     @DeleteMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void deleteGrouping(@RequestBody Grouping grouping) {
-        if (grouping.keywords().size() == 0) {
+        if (grouping.keywords().isEmpty()) {
             logger.info(EMPTY_GROUPING_MSG);
             return;
         }
-        logger.info("Remove" + grouping);
+        logger.info("Remove{}", grouping);
 
-        Grouping removedObject = template.findAndRemove(
+        Grouping removed = template.findAndRemove(
                 Query.query(keywordCriteria(grouping.keywords())), Grouping.class, COLLECTION);
 
-        logger.debug("Removed: " + removedObject);
+        logger.debug("Removed: {}", removed);
     }
 
     private Criteria keywordCriteria(List<String> keywords) {
-        Criteria criteria = Criteria.where(KEYWORDS).size(keywords.size());
-
-        keywords.stream().map(keyword -> Criteria.where(KEYWORDS).in(keyword))
-                .reduce((a, b) -> b.andOperator(a)).ifPresent(criteria::andOperator);
-
-        return criteria;
+        return Criteria.where(KEYWORDS).size(keywords.size()).andOperator(
+                keywords.stream().map(keyword -> Criteria.where(KEYWORDS).in(keyword)).toArray(Criteria[]::new));
     }
 
     @ExceptionHandler(value = Exception.class)

@@ -1,6 +1,7 @@
 package com.epam.resume.request;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -12,8 +13,6 @@ import org.springframework.boot.jackson.JsonComponent;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class SearchResume {
 
@@ -66,12 +65,9 @@ public class SearchResume {
         public SearchResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-            logger.debug("Deserializing: " + node);
+            logger.debug("Deserializing: {}", node);
 
-            Iterable<JsonNode> iterable = () -> node.get(KEYWORDS).elements();
-            List<String> keywords = StreamSupport.stream(iterable.spliterator(), false)
-                    .map(a -> a.asText().toLowerCase())
-                    .collect(Collectors.toList());
+            List<String> keywords = Utils.collect(node.get(KEYWORDS).elements(), a -> a.asText().toLowerCase());
 
             int page = node.get(PAGE).asInt();
             int experience = node.get(Constants.EXPERIENCE).asInt();

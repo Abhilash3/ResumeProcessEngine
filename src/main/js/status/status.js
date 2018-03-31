@@ -19,7 +19,7 @@ class Status extends React.Component {
 
     remove(e) {
         e.preventDefault();
-        this.prop.close();
+        this.props.close();
     }
 
     render() {

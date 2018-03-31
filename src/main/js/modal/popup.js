@@ -7,18 +7,15 @@ class Popup extends React.Component {
         this.event = event;
         this.open = this.open.bind(this);
         this.close = this.close.bind(this);
-        this.keyup = this.keyup.bind(this);
     }
 
     componentDidMount() {
         this.dom = document.querySelector(this.selector);
         document.addEventListener(this.event, this.open, false);
-        this.dom.addEventListener('keyup', this.keyup, false);
     }
 
     componentWillUnmount() {
         document.removeEventListener(this.event, this.open, false);
-        this.dom.removeEventListener('keyup', this.keyup, false);
     }
 
     open(e) {
@@ -34,19 +31,12 @@ class Popup extends React.Component {
         this.update();
     }
 
-    update() {
+    update(details) {
         throw new Error('Not Supported');
     }
 
     render() {
         throw new Error('Not Supported');
-    }
-
-    keyup(e) {
-        e.preventDefault();
-        if (e.keyCode === 27) {
-            this.close();
-        }
     }
 }
 

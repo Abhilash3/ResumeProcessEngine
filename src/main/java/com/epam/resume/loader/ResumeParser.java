@@ -53,7 +53,7 @@ class ResumeParser {
                 .filter(a -> a <= currentYear && a >= currentYear - 30)
                 .collect(Collectors.toList());
 
-        if (years.size() == 0) {
+        if (years.isEmpty()) {
             return 0;
         }
 
@@ -82,7 +82,7 @@ class ResumeParser {
         String fileFullName = file.getName();
         String fileName = fileFullName.substring(0, fileFullName.lastIndexOf('.')).trim();
         String extension = fileFullName.substring(fileFullName.lastIndexOf('.') + 1);
-        String fileContent = FileTypes.parse(extension).parse(file);
+        String fileContent = FileTypes.parser(extension).parse(file);
         String filePath = file.getAbsolutePath().replaceAll("[\\\\]", "/").split(basePath)[1];
         long lastModified = file.lastModified();
 
