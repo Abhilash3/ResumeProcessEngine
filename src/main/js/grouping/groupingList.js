@@ -43,7 +43,7 @@ class GroupingList extends React.Component {
             path: '/grouping/retrieve',
             headers: {'Accept' : 'application/json'}
         }).then(response => {
-            this.update(response.entity.map(a => ({keywords: a, edit: false})));
+            this.update(response.entity.map(a => ({keywords: a.keywords, edit: false})));
         }, response => {
             console.log(response);
             document.dispatchEvent(new CustomEvent('display-status', {detail: {imp: true, type: 'danger', text: 'Error while refresh'}}));
@@ -101,7 +101,7 @@ class GroupingList extends React.Component {
 
         client({
             method: 'POST',
-            entity: {old_version: oldKeywords, new_version: newKeywords},
+            entity: {older: oldKeywords, newer: newKeywords},
             path: '/grouping/update',
             headers: {'Content-Type': 'application/json'}
         }).then(response => {

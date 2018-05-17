@@ -21,23 +21,18 @@ public class Resume {
     @Id
     private final String id;
     private final String email;
-    private final String extension;
-    private final String fileName;
-    private final String filePath;
-    private final long lastModified;
+
+    private final FileProperties properties;
 
     private final Map<String, Long> words;
     private final int graduation;
     private final String notes;
 
-    public Resume(String id, String email, String fileName, String extension, String filePath, long lastModified,
-                  int graduation, Map<String, Long> words, String notes) {
+    public Resume(String id, String email, FileProperties properties, int graduation,
+                  Map<String, Long> words, String notes) {
         this.id = id;
         this.email = email;
-        this.fileName = fileName;
-        this.extension = extension;
-        this.filePath = filePath;
-        this.lastModified = lastModified;
+        this.properties = properties;
         this.graduation = graduation;
         this.words = words;
         this.notes = notes;
@@ -49,19 +44,16 @@ public class Resume {
         if (o == null || getClass() != o.getClass()) return false;
         Resume resume = (Resume) o;
         return graduation == resume.graduation &&
-                lastModified == resume.lastModified &&
                 Objects.equals(id, resume.id) &&
                 Objects.equals(email, resume.email) &&
-                Objects.equals(extension, resume.extension) &&
-                Objects.equals(fileName, resume.fileName) &&
-                Objects.equals(filePath, resume.filePath) &&
+                Objects.equals(properties, resume.properties) &&
                 Objects.equals(words, resume.words) &&
                 Objects.equals(notes, resume.notes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, extension, fileName, filePath, words, graduation, lastModified, notes);
+        return Objects.hash(id, email, properties, words, graduation, notes);
     }
 
     @Override
@@ -72,39 +64,9 @@ public class Resume {
     public String details() {
         return "Resume{id='" + id +
                 "', email='" + email +
-                "', extension='" + extension +
-                "', fileName='" + fileName +
-                "', filePath='" + filePath +
-                "', lastModified=" + lastModified +
+                "', properties=" + properties +
                 ", graduation=" + graduation +
                 ", notes='" + notes + "'}";
-    }
-
-    @JsonComponent
-    private static class Serializer extends JsonSerializer<Resume> {
-
-        private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
-
-        private static final String NO_EXPERIENCE = "Experience not found";
-
-        @Override
-        public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            logger.debug("Serializing: {}", resume);
-
-            jsonGenerator.writeStartObject();
-            jsonGenerator.writeStringField(Constants.ID, resume.id());
-            jsonGenerator.writeStringField(Constants.Resume.FILE_NAME, resume.fileName());
-            int graduationYear = resume.graduation();
-            jsonGenerator.writeNumberField(Constants.Resume.GRADUATION, graduationYear);
-            String experience = NO_EXPERIENCE;
-            if (graduationYear != 0) {
-                experience = String.valueOf(Utils.currentYear() - graduationYear);
-            }
-            jsonGenerator.writeStringField(Constants.EXPERIENCE, experience);
-            jsonGenerator.writeObjectField(Constants.Resume.EMAIL, resume.email());
-            jsonGenerator.writeObjectField(Constants.Resume.NOTES, resume.notes());
-            jsonGenerator.writeEndObject();
-        }
     }
 
     public String id() {
@@ -116,19 +78,19 @@ public class Resume {
     }
 
     public String extension() {
-        return extension;
+        return properties.extension();
     }
 
     public String fileName() {
-        return fileName;
+        return properties.fileName();
     }
 
     public String filePath() {
-        return filePath;
+        return properties.filePath();
     }
 
     public long lastModified() {
-        return lastModified;
+        return properties.lastModified();
     }
 
     public Map<String, Long> words() {
@@ -144,6 +106,37 @@ public class Resume {
     }
 
     public String fullName() {
-        return fileName + Constants.PERIOD + extension;
+        return properties.fullName();
+    }
+
+    public FileProperties properties() {
+        return properties;
+    }
+
+    @JsonComponent
+    private static class Serializer extends JsonSerializer<Resume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
+
+        private static final String NO_EXPERIENCE = "Experience not found";
+
+        @Override
+        public void serialize(Resume resume, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            logger.debug("Serializing: {}", resume);
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeStringField(Constants.ID, resume.id());
+            jsonGenerator.writeStringField(Constants.FileProperties.FILE_NAME, resume.fileName());
+            int graduationYear = resume.graduation();
+            jsonGenerator.writeNumberField(Constants.Resume.GRADUATION, graduationYear);
+            String experience = NO_EXPERIENCE;
+            if (graduationYear != 0) {
+                experience = String.valueOf(Utils.currentYear() - graduationYear);
+            }
+            jsonGenerator.writeStringField(Constants.EXPERIENCE, experience);
+            jsonGenerator.writeObjectField(Constants.Resume.EMAIL, resume.email());
+            jsonGenerator.writeObjectField(Constants.Resume.NOTES, resume.notes());
+            jsonGenerator.writeEndObject();
+        }
     }
 }

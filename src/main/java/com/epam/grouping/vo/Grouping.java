@@ -1,6 +1,7 @@
 package com.epam.grouping.vo;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
@@ -12,8 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Document(collection = Constants.Grouping.COLLECTION)
 public class Grouping {
@@ -42,6 +41,14 @@ public class Grouping {
         return "Grouping{keywords=" + keywords + '}';
     }
 
+    public List<String> keywords() {
+        return keywords;
+    }
+
+    public boolean isEmpty() {
+        return keywords.isEmpty();
+    }
+
     @JsonComponent
     private static class Serializer extends JsonSerializer<Grouping> {
 
@@ -50,7 +57,10 @@ public class Grouping {
         @Override
         public void serialize(Grouping grouping, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             logger.debug("Serializing: {}", grouping);
-            jsonGenerator.writeObject(grouping.keywords());
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeObjectField(Constants.Grouping.KEYWORDS, grouping.keywords());
+            jsonGenerator.writeEndObject();
         }
     }
 
@@ -65,16 +75,9 @@ public class Grouping {
 
             logger.debug("Deserializing: {}", node);
 
-            Iterable<JsonNode> iterable = () -> node.get(Constants.Grouping.KEYWORDS).elements();
-            List<String> keywords = StreamSupport.stream(iterable.spliterator(), false)
-                    .map(a -> a.asText().trim().toLowerCase())
-                    .collect(Collectors.toList());
-
+            List<String> keywords =
+                    Utils.collect(node.get(Constants.Grouping.KEYWORDS).elements(), a -> a.asText().trim().toLowerCase());
             return new Grouping(keywords);
         }
-    }
-
-    public List<String> keywords() {
-        return keywords;
     }
 }

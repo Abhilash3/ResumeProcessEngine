@@ -66,20 +66,21 @@ echo @echo off> "start.bat"
 if /i %skipM% == y      goto:skipMongodbSteps
 if /i %skipM% == yes    goto:skipMongodbSteps
 
-echo mkdir ./data
-set /p mongoLoc="MongoDB main dir: "
-echo @start cmd /k "%mongoLoc%/Server/3.6/bin/mongod.exe" --dbpath ./data>> "start.bat"
+mkdir ./data
+
+set /p mongoLoc="MongoDB server dir: "
+echo start cmd /k "%mongoLoc%/bin/mongod.exe" --dbpath ./data>> ./start.bat
 
 :skipMongodbSteps
 
-set /p javaLoc="Java8 jdk dir: "
-echo @start cmd /k "%javaLoc%/bin/java" -jar ./resume_engine.jar>> "start.bat"
+set /p javaLoc="Java jdk dir: "
+echo start cmd /k "%javaLoc%/bin/java" -jar ./resume_engine.jar>> ./start.bat
 
 echo ###################################################################
 echo #                                                                 #
 echo # Script created.                                                 #
 echo # To start application, run start.bat                             #
-echo # To stop application, close command prompts started by start.bat #
+echo # To stop application, run stop.bat                               #
 echo #                                                                 #
 echo ###################################################################
 

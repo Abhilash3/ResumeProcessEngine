@@ -2,10 +2,9 @@ package com.epam.resume.request;
 
 import com.epam.common.Constants;
 import com.epam.common.Utils;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.jackson.JsonComponent;
@@ -21,7 +20,7 @@ public class SearchResume {
     private final int experience;
     private final String sort;
 
-    SearchResume(int page, List<String> keywords, int experience, String sort) {
+    public SearchResume(int page, List<String> keywords, int experience, String sort) {
         this.page = page;
         this.keywords = keywords;
         this.experience = experience;
@@ -52,31 +51,6 @@ public class SearchResume {
                 ", sort='" + sort + "'}";
     }
 
-    @JsonComponent
-    private static class Deserializer extends JsonDeserializer<SearchResume> {
-
-        private static final Logger logger = LoggerFactory.getLogger(Deserializer.class);
-
-        private static final String PAGE = "page";
-        private static final String SORT = "sort";
-        private static final String KEYWORDS = "keywords";
-
-        @Override
-        public SearchResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-
-            logger.debug("Deserializing: {}", node);
-
-            List<String> keywords = Utils.collect(node.get(KEYWORDS).elements(), a -> a.asText().toLowerCase());
-
-            int page = node.get(PAGE).asInt();
-            int experience = node.get(Constants.EXPERIENCE).asInt();
-            String sort = node.get(SORT).asText().toLowerCase();
-
-            return new SearchResume(page, keywords, experience, sort);
-        }
-    }
-
     public int page() {
         return page;
     }
@@ -91,5 +65,44 @@ public class SearchResume {
 
     public String sort() {
         return sort;
+    }
+
+    @JsonComponent
+    private static class Serializer extends JsonSerializer<SearchResume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
+
+        @Override
+        public void serialize(SearchResume searchResume, JsonGenerator jsonGenerator, SerializerProvider serializers) throws IOException {
+            logger.debug("Serializing: {}", searchResume);
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeStringField(Constants.SORT, searchResume.sort());
+            jsonGenerator.writeStringField(Constants.PAGE, String.valueOf(searchResume.page()));
+            jsonGenerator.writeStringField(Constants.EXPERIENCE, String.valueOf(searchResume.experience()));
+            jsonGenerator.writeObjectField(Constants.KEYWORDS, searchResume.keywords());
+            jsonGenerator.writeEndObject();
+        }
+    }
+
+    @JsonComponent
+    private static class Deserializer extends JsonDeserializer<SearchResume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Deserializer.class);
+
+        @Override
+        public SearchResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+
+            logger.debug("Deserializing: {}", node);
+
+            List<String> keywords = Utils.collect(node.get(Constants.KEYWORDS).elements(), a -> a.asText().toLowerCase());
+
+            int page = node.get(Constants.PAGE).asInt();
+            int experience = node.get(Constants.EXPERIENCE).asInt();
+            String sort = node.get(Constants.SORT).asText().toLowerCase();
+
+            return new SearchResume(page, keywords, experience, sort);
+        }
     }
 }

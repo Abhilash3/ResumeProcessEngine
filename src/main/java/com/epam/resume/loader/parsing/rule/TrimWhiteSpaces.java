@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 @Component
 @Order(2)
-class RemoveExtraSpace implements Function<String, String> {
+public class TrimWhiteSpaces implements Function<String, String> {
     @Override
     public String apply(String s) {
         return s.replaceAll(Constants.Patterns.WHITESPACES, Constants.SPACE);

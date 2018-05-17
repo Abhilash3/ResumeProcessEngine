@@ -13,7 +13,7 @@ class Status extends React.Component {
 
     componentDidMount() {
         if (!this.item.imp) {
-            setTimeout(this.props.close, this.item.timeout || 5000);
+            setTimeout(this.props.close, this.item.timeout >= 0 ? this.item.timeout : 5000);
         }
     }
 

@@ -13,13 +13,25 @@ public class ApplicationServices {
 
     @PostMapping(value = "/log/{level}", consumes = MediaType.TEXT_PLAIN_VALUE)
     public void log(@PathVariable String level, @RequestBody String msg) {
-        switch(level.toLowerCase()) {
-            case "info": logger.info(msg); break;
-            case "warn": logger.warn(msg); break;
-            case "error": logger.error(msg); break;
-            case "debug": logger.debug(msg); break;
-            case "trace": logger.trace(msg); break;
-            default: logger.error("Unknown level: {}, with msg: {}", level, msg); break;
+        switch (level.toLowerCase()) {
+            case "info":
+                logger.info(msg);
+                break;
+            case "warn":
+                logger.warn(msg);
+                break;
+            case "error":
+                logger.error(msg);
+                break;
+            case "debug":
+                logger.debug(msg);
+                break;
+            case "trace":
+                logger.trace(msg);
+                break;
+            default:
+                logger.error("Unknown level: {}, with msg: {}", level, msg);
+                break;
         }
     }
 }

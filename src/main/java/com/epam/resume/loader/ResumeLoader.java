@@ -20,7 +20,6 @@ class ResumeLoader implements CommandLineRunner {
 
     @Value("${application.resume.location}")
     private String resumeLocation;
-
     @Value("${application.resume.level}")
     private int levelInside;
 
@@ -36,7 +35,7 @@ class ResumeLoader implements CommandLineRunner {
     private void loadResumes() {
 
         logger.info("Loader started");
-        long startTime = Utils.currentTimeInMillis();
+        long startTime = Utils.currentMillis();
 
         FileTypes.listFiles(resumeLocation, levelInside).stream()
                 .filter(file -> file.lastModified() >= lastRun)
@@ -48,7 +47,8 @@ class ResumeLoader implements CommandLineRunner {
 
                         if (existing != null && resume.lastModified() <= existing.lastModified()) {
                             return;
-                        } else if (existing != null) {
+                        }
+                        if (existing != null) {
                             logger.debug("Removing older version: {}", existing.details());
                             template.remove(existing, Constants.Resume.COLLECTION);
                             resume = merged(resume, existing);
@@ -61,17 +61,16 @@ class ResumeLoader implements CommandLineRunner {
                     }
                 });
 
-        logger.info("Loader finished in {} millis", Utils.currentTimeInMillis() - startTime);
+        logger.info("Loader finished in {} millis", Utils.currentMillis() - startTime);
         lastRun = startTime;
     }
 
     private Resume merged(Resume newer, Resume older) {
-        return new Resume(newer.id(), newer.email(), newer.fileName(), newer.extension(), newer.filePath(),
-                newer.lastModified(), newer.graduation(), newer.words(), older.notes());
+        return new Resume(newer.id(), newer.email(), newer.properties(), newer.graduation(), newer.words(), older.notes());
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         loadResumes();
     }
 }

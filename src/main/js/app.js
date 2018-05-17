@@ -1,11 +1,8 @@
 const React = require('react');
-const ReactDOM = require('react-dom');
-const ResumeSearch = require('./resume/resumeSearch');
-const StatusList = require('./status/statusList');
 const client = require('./api/client');
 
 class App extends React.Component {
-    componentDidMount() {
+    componentWillMount() {
         window.onerror = function() {
             client({
                 method: 'POST',
@@ -15,18 +12,6 @@ class App extends React.Component {
             });
         }
     }
-
-    render() {
-        return (
-            <div>
-                <ResumeSearch />
-                <StatusList />
-            </div>
-        );
-    }
 }
 
-ReactDOM.render(
-    <App />,
-    document.querySelector('#app')
-)
+module.exports = App;

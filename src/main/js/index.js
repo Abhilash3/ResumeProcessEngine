@@ -1,16 +1,14 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const GroupingList = require('./grouping/groupingList');
-const Confirm = require('./modal/confirm');
+const ResumeSearch = require('./resume/resumeSearch');
 const StatusList = require('./status/statusList');
 const App = require('./app');
 
-class Conf extends App {
+class Index extends App {
     render() {
         return (
             <div>
-                <GroupingList />
-                <Confirm />
+                <ResumeSearch />
                 <StatusList />
             </div>
         );
@@ -18,6 +16,6 @@ class Conf extends App {
 }
 
 ReactDOM.render(
-    <Conf />,
+    <Index />,
     document.querySelector('#container')
 )

@@ -4,6 +4,7 @@ import com.epam.common.Constants;
 import com.epam.common.Utils;
 import com.epam.file.FileTypes;
 import com.epam.resume.loader.parsing.Rules;
+import com.epam.resume.vo.FileProperties;
 import com.epam.resume.vo.Resume;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +29,7 @@ class ResumeParser {
     private Rules rules;
 
     private Map<String, Long> wordFrequency(String string) {
-        return Arrays.stream(rules.applyRules(string).split(Constants.SPACE)).filter(a -> a.length() > 0)
-                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        return Utils.wordFrequency(rules.applyRules(string));
     }
 
     private String emailId(String string) {
@@ -91,8 +91,7 @@ class ResumeParser {
         int graduationYear = graduationYear(fileContent);
 
         String id = NO_EMAIL.equals(email) ? filePath : email;
-
-        return new Resume(id, email, fileName, extension, filePath, lastModified,
-                graduationYear, frequency, Constants.BLANK);
+        FileProperties properties = new FileProperties(fileName, extension, filePath, lastModified);
+        return new Resume(id, email, properties, graduationYear, frequency, Constants.BLANK);
     }
 }

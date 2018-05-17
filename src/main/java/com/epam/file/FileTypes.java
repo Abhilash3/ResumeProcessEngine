@@ -1,6 +1,7 @@
 package com.epam.file;
 
 import com.epam.common.Constants;
+import com.epam.common.Utils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hwpf.HWPFDocument;
@@ -21,7 +22,7 @@ public class FileTypes {
     private static final Logger logger = LoggerFactory.getLogger(FileTypes.class);
 
     private FileTypes() {
-        throw new UnsupportedOperationException();
+        throw Utils.runtimeException(Constants.Message.NOT_INITIALIZABLE);
     }
 
     public static FileType parser(String extension) {
@@ -30,9 +31,7 @@ public class FileTypes {
 
     public static List<File> listFiles(String location, int levelInside) {
         List<File> files = listFiles(new File(location), levelInside);
-
         logger.debug("Identified {} file(s) from {}", files.size(), location);
-
         return files;
     }
 
@@ -44,8 +43,9 @@ public class FileTypes {
         List<String> extensions = Arrays.stream(FileType.values())
                 .map(FileType::extension).collect(Collectors.toList());
 
-        List<File> files = Arrays.stream(dir.listFiles(file ->
-                file.isFile() && extensions.stream().anyMatch(extension -> file.getName().endsWith(extension)))
+        List<File> files = Arrays.stream(
+                dir.listFiles(file ->
+                        file.isFile() && extensions.stream().anyMatch(extension -> file.getName().endsWith(extension)))
         ).collect(Collectors.toList());
 
         if (level != 0) {

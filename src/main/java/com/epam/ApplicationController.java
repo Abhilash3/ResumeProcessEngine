@@ -12,7 +12,12 @@ public class ApplicationController {
     }
 
     @RequestMapping(value = "/conf")
-    public String configuration() {
+    public String conf() {
         return "conf";
+    }
+
+    @RequestMapping(value = "/issues")
+    public String issues() {
+        return "issues";
     }
 }

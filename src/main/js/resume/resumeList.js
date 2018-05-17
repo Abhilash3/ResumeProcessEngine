@@ -16,8 +16,8 @@ class ResumeList extends React.Component {
         }
 
         if (e.target.classList.contains('note-editor')) {
-            let resume = this.props.resumes.find(a => a.id === e.target.dataset.id);
-            return document.dispatchEvent(new CustomEvent('note-editor', { detail: resume }));
+            let detail = this.props.resumes.find(a => a.id === e.target.dataset.id);
+            return document.dispatchEvent(new CustomEvent('note-editor', { detail }));
         }
     }
 

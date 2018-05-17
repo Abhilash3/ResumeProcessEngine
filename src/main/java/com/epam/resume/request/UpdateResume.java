@@ -1,10 +1,9 @@
 package com.epam.resume.request;
 
 import com.epam.common.Constants;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.jackson.JsonComponent;
@@ -18,7 +17,7 @@ public class UpdateResume {
     private final String field;
     private final String content;
 
-    UpdateResume(String id, String field, String content) {
+    public UpdateResume(String id, String field, String content) {
         this.id = id;
         this.field = field;
         this.content = content;
@@ -46,28 +45,6 @@ public class UpdateResume {
                 "', content='" + content + "'}";
     }
 
-    @JsonComponent
-    private static class Deserializer extends JsonDeserializer<UpdateResume> {
-
-        private static final Logger logger = LoggerFactory.getLogger(Deserializer.class);
-
-        private static final String FIELD = "field";
-        private static final String CONTENT = "content";
-
-        @Override
-        public UpdateResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-
-            logger.debug("Deserializing: {}", node);
-
-            String id = node.get(Constants.ID).asText();
-            String field = node.get(FIELD).asText();
-            String content = node.get(CONTENT).asText();
-
-            return new UpdateResume(id, field, content);
-        }
-    }
-
     public String id() {
         return id;
     }
@@ -78,5 +55,41 @@ public class UpdateResume {
 
     public String content() {
         return content;
+    }
+
+    @JsonComponent
+    private static class Serializer extends JsonSerializer<UpdateResume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
+
+        @Override
+        public void serialize(UpdateResume updateResume, JsonGenerator jsonGenerator, SerializerProvider serializers) throws IOException {
+            logger.debug("Serializing: {}", updateResume);
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeStringField(Constants.ID, updateResume.id());
+            jsonGenerator.writeStringField(Constants.FIELD, updateResume.field());
+            jsonGenerator.writeStringField(Constants.CONTENT, updateResume.content());
+            jsonGenerator.writeEndObject();
+        }
+    }
+
+    @JsonComponent
+    private static class Deserializer extends JsonDeserializer<UpdateResume> {
+
+        private static final Logger logger = LoggerFactory.getLogger(Deserializer.class);
+
+        @Override
+        public UpdateResume deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+            JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+
+            logger.debug("Deserializing: {}", node);
+
+            String id = node.get(Constants.ID).asText();
+            String field = node.get(Constants.FIELD).asText();
+            String content = node.get(Constants.CONTENT).asText();
+
+            return new UpdateResume(id, field, content);
+        }
     }
 }

@@ -32,7 +32,7 @@ class GroupingServices {
 
     @GetMapping(value = "/retrieve", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Grouping> retrieveGroupings() {
-        logger.info("RetrieveGrouping{}");
+        logger.info("RetrieveGrouping");
         return template.findAll(Grouping.class, COLLECTION);
     }
 
@@ -49,7 +49,7 @@ class GroupingServices {
 
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void saveGrouping(@RequestBody Grouping grouping) {
-        if (grouping.keywords().isEmpty()) {
+        if (grouping.isEmpty()) {
             logger.info(EMPTY_GROUPING_MSG);
             return;
         }
@@ -60,7 +60,7 @@ class GroupingServices {
 
     @DeleteMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void deleteGrouping(@RequestBody Grouping grouping) {
-        if (grouping.keywords().isEmpty()) {
+        if (grouping.isEmpty()) {
             logger.info(EMPTY_GROUPING_MSG);
             return;
         }

@@ -53,8 +53,8 @@ class ResumeSearch extends React.Component {
     }
 
     onScroll() {
-        var scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
-        var scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
+        var scrollTop = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
+        var scrollHeight = document.documentElement && document.documentElement.scrollHeight || document.body.scrollHeight;
         var clientHeight = document.documentElement.clientHeight || window.innerHeight;
 
         if (Math.ceil(scrollTop + clientHeight) >= scrollHeight - 100 && this.details.count && !this.details.pending) {
