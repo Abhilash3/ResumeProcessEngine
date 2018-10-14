@@ -20,7 +20,7 @@ https://git-scm.com/downloads
 ```
 5. Open another command prompt and run following steps one by one
 ```
-git clone https://git.epam.com/Atul_Bharti/ResumeProcessEngine
+git clone https://github.com/Abhilash3/ResumeProcessEngine.git
 cd ResumeProcessEngine
 maven package
 ```
